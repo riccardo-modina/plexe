@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2020-2021 Michele Segata <segata@ccs-labs.org>
+// Copyright (C) 2012-2020 Michele Segata <segata@ccs-labs.org>
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 //
@@ -20,27 +20,28 @@
 
 #pragma once
 
-#include <string>
-#include "plexe/messages/PlexeInterfaceControlInfo_m.h"
+#include "plexe/protocols/BaseProtocol.h"
 
 namespace plexe {
 
-enum PlexeRadioInterfaces {
-    // up to 16 interfaces
-    ALL = 65535,
-    VEINS_11P = 1,
-    LTE_CV2X_MODE3 = 2,
-    VEINS_VLC_FRONT = 4,
-    VEINS_VLC_BACK = 8,
-};
+class VlcRepropagationProtocol : public BaseProtocol {
+private:
+    typedef std::map<int, int> SeqNumbers;
+    SeqNumbers seqNumbers;
 
-class PlexeRadioDriverInterface {
+    /**
+     * Updates the list of known packets and tells whether the packet needs to be repropagated
+     */
+    bool updateAndCheckRepropagation(PlatooningBeacon* pkt);
+protected:
+    virtual void handleSelfMsg(cMessage* msg);
+    virtual void messageReceived(PlatooningBeacon* pkt, veins::BaseFrame1609_4* frame);
+
 public:
-    PlexeRadioDriverInterface(){};
-    virtual ~PlexeRadioDriverInterface(){};
+    VlcRepropagationProtocol();
+    virtual ~VlcRepropagationProtocol();
 
-    // returns the type of the device which is used by the protocols to choose the proper radio interface
-    virtual int getDeviceType() = 0;
+    virtual void initialize(int stage);
 };
 
-} /* namespace plexe */
+} // namespace plexe
