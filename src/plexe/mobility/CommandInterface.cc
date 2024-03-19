@@ -254,6 +254,13 @@ void CommandInterface::Vehicle::getRadarMeasurements(double& distance, double& r
     buf >> distance >> relativeSpeed;
 }
 
+void CommandInterface::Vehicle:: getNoisyRadarMeasurements(double& distance, double& relSpeed, std::string& resmap, std::string distrib, double maxangle, double maxrange, double gausssd)
+{
+    std::string v;
+    veinsVehicle().getParameter(PAR_NOISYRADAR_DATA, v);
+    ParBuffer buf(v);
+    buf >> distance >> relSpeed >> resmap;
+}
 void CommandInterface::Vehicle::setLeaderVehicleFakeData(double controllerAcceleration, double acceleration, double speed)
 {
     ParBuffer buf;
