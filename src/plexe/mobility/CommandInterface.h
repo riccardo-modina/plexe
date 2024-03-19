@@ -184,7 +184,9 @@ public:
          * interpreted like "there is nobody in front"
          */
         void getRadarMeasurements(double& distance, double& relativeSpeed);
-        void getNoisyRadarMeasurements(double& distance, double& relSpeed, std::string& resmap, std::string distrib, double maxangle, double maxrange, double gausssd);
+        void getNoisyRadarMeasurements(double& distance, double& relSpeed, std::string& resmap,
+            std::string distrib = "gaussian", double maxangle = 70.0, double maxrange = 150.0,
+            double gausssd = 0.2);
 
         void setLeaderVehicleFakeData(double controllerAcceleration, double acceleration, double speed);
         void setLeaderFakeData(double leaderSpeed, double leaderAcceleration);

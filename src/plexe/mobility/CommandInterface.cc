@@ -254,12 +254,44 @@ void CommandInterface::Vehicle::getRadarMeasurements(double& distance, double& r
     buf >> distance >> relativeSpeed;
 }
 
-void CommandInterface::Vehicle:: getNoisyRadarMeasurements(double& distance, double& relSpeed, std::string& resmap, std::string distrib, double maxangle, double maxrange, double gausssd)
+void CommandInterface::Vehicle::getNoisyRadarMeasurements(double& distance, double& relSpeed,
+    std::string& resmap, std::string distrib, double maxangle, double maxrange, double gausssd)
 {
-    std::string v;
-    veinsVehicle().getParameter(PAR_NOISYRADAR_DATA, v);
-    ParBuffer buf(v);
-    buf >> distance >> relSpeed >> resmap;
+
+    //TODO: capire come fare una get specializzata da certi valori di argomenti scelti dall'utente
+    std::stringstream paramlist;
+    paramlist << distrib << maxangle << maxrange << gausssd;
+    static int32_t nParameters = 2;
+    TraCIBuffer buf = traci->connection.query(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer()
+            << static_cast<uint8_t>(VAR_PARAMETER) << nodeId << static_cast<uint8_t>(TYPE_COMPOUND)
+            << nParameters << static_cast<uint8_t>(TYPE_STRING) << parameter << static_cast<uint8_t>(TYPE_STRING) << paramlist.str());
+    ASSERT(buf.eof());
+
+
+    TraCIBuffer response = traci->connection.query(CMD_GET_VEHICLE_VARIABLE, TraCIBuffer()
+            << static_cast<uint8_t>(VAR_PARAMETER) << nodeId << static_cast<uint8_t>(TYPE_STRING) << parameter);
+    uint8_t cmdLength;
+    response >> cmdLength;
+    uint8_t responseId;
+    response >> responseId;
+    ASSERT(responseId == RESPONSE_GET_VEHICLE_VARIABLE);
+    uint8_t variable;
+    response >> variable;
+    ASSERT(variable == VAR_PARAMETER);
+    std::string id;
+    response >> id;
+    ASSERT(id == nodeId);
+    uint8_t type;
+    response >> type;
+    ASSERT(type == TYPE_STRING);
+    response >> value;
+
+//    veinsVehicle().setParameter(PAR_CACC_SPACING, spacing);
+//
+//    std::string v;
+//    veinsVehicle().getParameter(PAR_NOISYRADAR_DATA, v);
+//    ParBuffer buf(v);
+//    buf >> distance >> relSpeed >> resmap;
 }
 void CommandInterface::Vehicle::setLeaderVehicleFakeData(double controllerAcceleration, double acceleration, double speed)
 {
