@@ -246,53 +246,47 @@ void CommandInterface::Vehicle::setFixedLane(int8_t laneIndex, bool safe)
     cifc->laneChanges[nodeId] = lc;
 }
 
-void CommandInterface::Vehicle::getRadarMeasurements(double& distance, double& relativeSpeed)
+std::vector<std::pair<std::string, std::vector<double>>> CommandInterface::Vehicle::getRadarMeasurements(double& distance, double& relativeSpeed)
 {
+    std::vector<std::pair<std::string, std::vector<double>>> resMap;
     std::string v;
     veinsVehicle().getParameter(PAR_RADAR_DATA, v);
     ParBuffer buf(v);
     buf >> distance >> relativeSpeed;
+    std::string elem = buf.next();
+    if (elem == "")
+        return resMap;
+    else {
+        //noisyRadar was active, extract more data!
+        int readCount = 0; // we have an ID + 6 doubles to read
+        std::string vehId;
+        std::vector<double> record;
+        while(elem != "") {
+            std::cout << "\t* parsing buffer.next() = " << elem << std::endl;
+            if (readCount == 0)
+                vehId = elem;
+            else if (readCount < 7) {
+                record.push_back(std::stod(elem));
+            }
+            readCount++;
+            if (readCount == 7) {
+                resMap.push_back(std::make_pair(vehId, record));
+                readCount = 0;
+            }
+            elem = buf.next();
+        }
+        return resMap;
+    }
 }
 
-void CommandInterface::Vehicle::getNoisyRadarMeasurements(double& distance, double& relSpeed,
-    std::string& resmap, std::string distrib, double maxangle, double maxrange, double gausssd)
+void CommandInterface::Vehicle::setNoisyRadarModelParams(bool useNoisyRadarModel,
+    std::string distrib, double maxrange, double maxangle,  double mean, double sd)
 {
-
-    //TODO: capire come fare una get specializzata da certi valori di argomenti scelti dall'utente
-    std::stringstream paramlist;
-    paramlist << distrib << maxangle << maxrange << gausssd;
-    static int32_t nParameters = 2;
-    TraCIBuffer buf = traci->connection.query(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer()
-            << static_cast<uint8_t>(VAR_PARAMETER) << nodeId << static_cast<uint8_t>(TYPE_COMPOUND)
-            << nParameters << static_cast<uint8_t>(TYPE_STRING) << parameter << static_cast<uint8_t>(TYPE_STRING) << paramlist.str());
-    ASSERT(buf.eof());
-
-
-    TraCIBuffer response = traci->connection.query(CMD_GET_VEHICLE_VARIABLE, TraCIBuffer()
-            << static_cast<uint8_t>(VAR_PARAMETER) << nodeId << static_cast<uint8_t>(TYPE_STRING) << parameter);
-    uint8_t cmdLength;
-    response >> cmdLength;
-    uint8_t responseId;
-    response >> responseId;
-    ASSERT(responseId == RESPONSE_GET_VEHICLE_VARIABLE);
-    uint8_t variable;
-    response >> variable;
-    ASSERT(variable == VAR_PARAMETER);
-    std::string id;
-    response >> id;
-    ASSERT(id == nodeId);
-    uint8_t type;
-    response >> type;
-    ASSERT(type == TYPE_STRING);
-    response >> value;
-
-//    veinsVehicle().setParameter(PAR_CACC_SPACING, spacing);
-//
-//    std::string v;
-//    veinsVehicle().getParameter(PAR_NOISYRADAR_DATA, v);
-//    ParBuffer buf(v);
-//    buf >> distance >> relSpeed >> resmap;
+    ParBuffer buf;
+    buf << useNoisyRadarModel << distrib << maxrange << maxangle << mean << sd;
+    veinsVehicle().setParameter(PAR_NOISY_RADAR_MODEL_DATA, buf.str());
 }
+
 void CommandInterface::Vehicle::setLeaderVehicleFakeData(double controllerAcceleration, double acceleration, double speed)
 {
     ParBuffer buf;

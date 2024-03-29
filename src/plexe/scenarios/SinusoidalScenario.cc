@@ -59,6 +59,11 @@ void SinusoidalScenario::initialize(int stage)
             // to the leader when it is accelerating
             plexeTraciVehicle->setCruiseControlDesiredSpeed(leaderSpeed + 2 * oscillationAmplitude);
         }
+        std::string sumoid = positionHelper->getExternalId();
+        if (sumoid == "vtypeauto.0") {
+            testMsg = new cMessage("Fai qualcosa");
+            scheduleAt(5.0, testMsg);
+        }
     }
 }
 
@@ -74,6 +79,23 @@ void SinusoidalScenario::handleSelfMsg(cMessage* msg)
     if (msg == changeSpeed) {
         plexeTraciVehicle->setCruiseControlDesiredSpeed(leaderSpeed + oscillationAmplitude * sin(2 * M_PI * (simTime() - startOscillating).dbl() * leaderOscillationFrequency));
         scheduleAt(simTime() + SimTime(0.1), changeSpeed);
+    } else if (msg == testMsg) {
+        std::cout << "#################" << std::endl;
+        std::cout << positionHelper->getExternalId() << std::endl;
+        double dist, relSp;
+
+        plexeTraciVehicle->getRadarMeasurements(dist, relSp);
+        std::cout << "True values withtout sminking:" << std::endl;
+        std::cout << "dist: " << dist << " relSp: " << relSp << std::endl;
+
+        plexeTraciVehicle->setNoisyRadarModelParams(); // con param Default
+        auto resMap = plexeTraciVehicle->getRadarMeasurements(dist, relSp);
+
+        std::cout << "------------------------" << std::endl;
+        std::cout << "ENABLING RANDOM ERRORS:" << std::endl;
+        std::cout << "dist: " << dist << " relSp: " << relSp << std::endl;
+        std::cout << "#################" << std::endl;
+        endSimulation();
     }
 }
 

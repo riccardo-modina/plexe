@@ -165,7 +165,7 @@ struct VEHICLE_DATA {
 
 // get radar data from the car
 #define PAR_RADAR_DATA (parameter_prefix + "ccrd")
-#define PAR_NOISYRADAR_DATA (parameter_prefix + "ccnrd")
+#define PAR_NOISY_RADAR_MODEL_DATA (parameter_prefix + "ccnrmd")
 
 // communicate with the cruise control to give him fake indications. this can be useful when you want
 // to advance a vehicle to a certain position, for example, for joining a platoon. clearly the ACC
