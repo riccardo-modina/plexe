@@ -183,16 +183,18 @@ public:
          * method returns a distance value greater than 250m, it shall be
          * interpreted like "there is nobody in front"
          */
-        void getRadarMeasurements(double& distance, double& relativeSpeed);
-        void getNoisyRadarMeasurements(double& distance, double& relSpeed, std::string& resmap,
-            std::string distrib = "gaussian", double maxangle = 70.0, double maxrange = 150.0,
-            double gausssd = 0.2);
+        std::vector<std::pair<std::string, std::vector<double>>>
+        getRadarMeasurements(double& distance, double& relativeSpeed);
+        void setNoisyRadarModelParams(bool useNoisyRadarModel = true, std::string distrib = "gaussian", double maxrange = 150.0,
+            double maxangle = 70.0, double mean = 0.0, double sd = 0.2);
 
         void setLeaderVehicleFakeData(double controllerAcceleration, double acceleration, double speed);
         void setLeaderFakeData(double leaderSpeed, double leaderAcceleration);
 
         void setFrontVehicleFakeData(double controllerAcceleration, double acceleration, double speed, double distance);
         void setFrontFakeData(double frontDistance, double frontSpeed, double frontAcceleration);
+
+
 
         /**
          * Gets the distance that a vehicle has to travel to reach the end of

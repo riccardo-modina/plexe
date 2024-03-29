@@ -41,6 +41,7 @@ protected:
     int nLanes;
     // message used to tell the leader to continuously change its desired speed
     cMessage* changeSpeed;
+    cMessage* testMsg;
     // start oscillation time
     SimTime startOscillating;
 
