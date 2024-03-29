@@ -250,11 +250,11 @@ void CommandInterface::Vehicle::getRadarMeasurements(double& distance, double& r
 {
     std::string v;
     veinsVehicle().getParameter(PAR_RADAR_DATA, v);
-    ParBuffer buf(v);
+    ParBuffer buf(v); //organizza in modo ordinato v. Impacchetta le variabili
     buf >> distance >> relativeSpeed;
 }
 
-void CommandInterface::Vehicle:: getNoisyRadarMeasurements(double& distance, double& relSpeed, std::string& resmap, std::string distrib, double maxangle, double maxrange, double gausssd)
+void CommandInterface::Vehicle::getNoisyRadarMeasurements(double& distance, double& relSpeed, std::string& resmap, std::string distrib, double maxangle, double maxrange, double gausssd)
 {
     std::string v;
     veinsVehicle().getParameter(PAR_NOISYRADAR_DATA, v);
