@@ -104,7 +104,7 @@ void SinusoidalScenario::handleSelfMsg(cMessage* msg)
 }
 
 void SinusoidalScenario::finish() {
-    std::ofstream outputFile("output.txt");
+    std::ofstream outputFile("RadarMeas.txt");
 
     if (outputFile.is_open()) {
         for (const auto& pair : accumulatedResults) {
@@ -116,8 +116,8 @@ void SinusoidalScenario::finish() {
         }
 
         outputFile.close();
-        std::cout << "The radar measurments have been saved in the file output.txt (results dir) with the order: "
-                     "distance distance with error speed speed with error and angle" << std::endl;
+        std::cout << "The radar measurments have been saved in the file RadarMeas.txt (RV example dir) with the order: "
+                     "distance - distance with error / speed - speed with error / angle" << std::endl;
     }
 } // namespace plexe
 }
