@@ -272,6 +272,7 @@ std::vector<std::pair<std::string, std::vector<double>>> CommandInterface::Vehic
             if (readCount == 7) {
                 resMap.push_back(std::make_pair(vehId, record));
                 readCount = 0;
+                record.clear();
             }
             elem = buf.next();
         }
@@ -280,10 +281,10 @@ std::vector<std::pair<std::string, std::vector<double>>> CommandInterface::Vehic
 }
 
 void CommandInterface::Vehicle::setNoisyRadarModelParams(bool useNoisyRadarModel,
-    std::string distrib, double maxrange, double maxangle,  double mean, double sd)
+    std::string distrib, double maxrange, double maxangle,  double meanDist, double sdDist, double meanVel, double sdVel)
 {
     ParBuffer buf;
-    buf << useNoisyRadarModel << distrib << maxrange << maxangle << mean << sd;
+    buf << useNoisyRadarModel << distrib << maxrange << maxangle << meanDist << sdDist << meanVel << sdVel;
     veinsVehicle().setParameter(PAR_NOISY_RADAR_MODEL_DATA, buf.str());
 }
 

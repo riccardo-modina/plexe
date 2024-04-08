@@ -96,7 +96,7 @@ void PlatoonsPlusHumanTraffic::insertPlatoons()
     for (int i = 0; i < nCars / nLanes; i++) {
         for (int l = 0; l < nLanes; l++) {
             automated.position = currentRoadPosition + laneOffset[l];
-            automated.lane = l;
+            automated.lane = 1;
             addVehicleToQueue(0, automated);
 
             VehicleInfo vehicleInfo;
@@ -136,7 +136,7 @@ void PlatoonsPlusHumanTraffic::insertHumans()
 {
 
     // keep 50 m between human vehicles (random number)
-    double distance = 50;
+    double distance = 30;
     // total number of cars per lane
     int carsPerLane = humanCars / humanLanes;
     // total length for one lane
@@ -144,11 +144,11 @@ void PlatoonsPlusHumanTraffic::insertHumans()
 
     // for each lane, we create an offset to have misaligned platoons
     double* laneOffset = new double[humanLanes];
-    for (int l = 0; l < humanLanes; l++) laneOffset[l] = uniform(0, 50);
+    for (int l = 0; l < humanLanes; l++) laneOffset[l] = uniform(0, 30);
 
     double currentPos = totalLength;
     for (int i = 0; i < carsPerLane; i++) {
-        for (int l = 0; l < humanLanes + nLanes; l++) {
+        for (int l = 0; l <= humanLanes ; l++) {
             human.position = currentPos + laneOffset[l - nLanes];
             human.lane = l;
             addVehicleToQueue(0, human);

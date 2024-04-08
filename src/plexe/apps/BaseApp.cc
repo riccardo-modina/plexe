@@ -73,7 +73,7 @@ void BaseApp::initialize(int stage)
         protocol->registerApplication(BaseProtocol::BEACON_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
 
         recordData = new cMessage("recordData");
-        // init statistics collection. round to 0.1 seconds
+        // init statistics collection. round to 0.1
         SimTime rounded = SimTime(floor(simTime().dbl() * 1000 + 100), SIMTIME_MS);
         scheduleAt(rounded, recordData);
     }
