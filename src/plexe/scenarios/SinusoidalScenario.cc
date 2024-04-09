@@ -17,12 +17,9 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-#include <fstream>
-#include <vector>
+
 #include <utility>
 #include "plexe/scenarios/SinusoidalScenario.h"
-using resMapAccumulator = std::vector<std::pair<std::string, std::vector<double>>>;
-resMapAccumulator accumulatedResults;
 
 namespace plexe {
 
@@ -63,11 +60,6 @@ void SinusoidalScenario::initialize(int stage)
             // to the leader when it is accelerating
             plexeTraciVehicle->setCruiseControlDesiredSpeed(leaderSpeed + 2 * oscillationAmplitude);
         }
-        std::string sumoid = positionHelper->getExternalId();
-        if (sumoid == "vtypeauto.0") {
-            testMsg = new cMessage("Getting infos from the radar");
-            scheduleAt(5.0, testMsg);
-        }
     }
 }
 
@@ -83,41 +75,7 @@ void SinusoidalScenario::handleSelfMsg(cMessage* msg)
     if (msg == changeSpeed) {
         plexeTraciVehicle->setCruiseControlDesiredSpeed(leaderSpeed + oscillationAmplitude * sin(2 * M_PI * (simTime() - startOscillating).dbl() * leaderOscillationFrequency));
         scheduleAt(simTime() + SimTime(0.1), changeSpeed);
-    } else if (msg == testMsg) {
-        scheduleAt(simTime() + 0.1, testMsg);
-        std::cout << positionHelper->getExternalId() << std::endl;
-        double dist, relSp;
-        std::vector<std::pair<std::string, std::vector<double>>> resMapAccumulator;
-        std::vector<std::pair<std::string, std::vector<double>>> SimulationTime;
-        double SimTime = omnetpp::simTime().dbl(); //Add the simulation Time at accumulatedResults
-        std::vector<double> SimTimeVec;
-        SimTimeVec.push_back(SimTime);
-        SimulationTime.push_back(std::make_pair("Time", SimTimeVec));
-
-        plexeTraciVehicle->setNoisyRadarModelParams(); // con param Default
-        auto resMap = plexeTraciVehicle->getRadarMeasurements(dist, relSp);
-
-        //Add the simulation Time at accumulatedResults
-        accumulatedResults.insert(accumulatedResults.end(), SimulationTime.begin(), SimulationTime.end());
-        accumulatedResults.insert(accumulatedResults.end(), resMap.begin(), resMap.end());
     }
 }
 
-void SinusoidalScenario::finish() {
-    std::ofstream outputFile("RadarMeas.txt");
-
-    if (outputFile.is_open()) {
-        for (const auto& pair : accumulatedResults) {
-            outputFile << pair.first << ":";
-            for (double value : pair.second) {
-                outputFile << " " << value;
-            }
-            outputFile << std::endl; // Vai alla riga successiva per il prossimo risultato
-        }
-
-        outputFile.close();
-        std::cout << "The radar measurments have been saved in the file RadarMeas.txt (RV example dir) with the order: "
-                     "distance - distance with error / speed - speed with error / angle" << std::endl;
-    }
 } // namespace plexe
-}

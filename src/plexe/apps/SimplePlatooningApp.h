@@ -23,6 +23,8 @@
 
 #include "plexe/apps/BaseApp.h"
 
+using resMap = std::vector<std::pair<std::string, std::vector<double>>>;
+
 namespace plexe {
 
 class SimplePlatooningApp : public BaseApp {
@@ -31,6 +33,15 @@ public:
     SimplePlatooningApp()
     {
     }
+    virtual void initialize(int stage) override;
+    virtual void finish() override;
+
+    int numInitStages() const override { return 3; }
+
+protected:
+    cMessage* sampleMsg;
+    resMap accumulatedResults;
+    virtual void handleSelfMsg(cMessage* msg) override;
 };
 
 } // namespace plexe

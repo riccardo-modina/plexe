@@ -1,9 +1,12 @@
 #!/bin/bash
 
 echo "Compiling PLEXE..."
+
 cd $PLEXE_DIR
-./configure --with-parquet
-#./configure
-make -j $(nproc) CXXFLAGS=-std=c++20
+
+./configure
+
+make -j $(nproc) #MODE=debug
+
 cd -
 

@@ -26,6 +26,7 @@ simple SimplePlatooningApp like BaseApp
 {
     parameters:
         int headerLength @unit("bit") = default(0 bit);
+        string outputcsv = default("radar.csv");
         @display("i=block/app2");
         @class(plexe::SimplePlatooningApp);
     gates:
