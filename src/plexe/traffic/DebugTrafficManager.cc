@@ -17,7 +17,7 @@ void DebugTrafficManager::initialize(int stage)
         insertTrafficMessage = new cMessage("insert cars");
         scheduleAt(1.0, insertTrafficMessage);
     }
-}
+} /*
 
 void DebugTrafficManager::insertCar(std::string route, int lane, double speed,
     double desiredSpeed, bool isCommEnabled, double position)
@@ -48,6 +48,64 @@ void DebugTrafficManager::insertCar(std::string route, int lane, double speed,
 
     this->positions.addVehicleToPlatoon(vehicle_info.id, vehicle_info);
     this->positions.setPlatoonInformation(vehicle_info.platoonId, platoon_info);
+}*/
+void DebugTrafficManager::insertCar(std::string route, int lane, double speed,
+    double desiredSpeed, bool isCommEnabled, double position)
+{
+    // Bool for a random insertion of RV or Humandriven cars
+    bool insertRVVehicle = uniform(0, 1) < 0.3;
+
+
+    if (isCommEnabled && insertRVVehicle) {
+        std::string vType = par("platooningVType").stdstringValue();
+        insertRVCar(route, lane, speed, desiredSpeed, position, vType);
+    } else {
+        std::string vType = par("noCommVType").stdstringValue();
+        insertHumanCar(route, lane, speed, desiredSpeed, position, vType);
+    }
+}
+
+void DebugTrafficManager::insertRVCar(std::string route, int lane, double speed,
+    double desiredSpeed, double position, std::string vType)
+{
+    //Insert ACC cars
+    Vehicle traci_info = {
+        .id = findVehicleTypeIndex(vType),
+        .lane = lane,
+        .position = static_cast<float>(position),
+    };
+    traci_info.speed = (float) speed;
+    traci_info.ccDesiredSpeed = desiredSpeed;
+    this->addVehicleToQueue(route, traci_info);
+
+    VehicleInfo vehicle_info = {
+        .controller = ACC, // initially vehs are all ACC
+        .distance = 5, // if ever used by a PATH veh...
+        .headway = 1.2,
+        .id = this->vehicleId,
+        .platoonId = this->vehicleId++,
+        .position = 0,
+    };
+    PlatoonInfo platoon_info{
+        .speed = traci_info.speed,
+        .lane = traci_info.lane};
+
+    this->positions.addVehicleToPlatoon(vehicle_info.id, vehicle_info);
+    this->positions.setPlatoonInformation(vehicle_info.platoonId, platoon_info);
+}
+
+void DebugTrafficManager::insertHumanCar(std::string route, int lane, double speed,
+    double desiredSpeed, double position, std::string vType)
+{
+    // Insert humandriven cars
+    Vehicle traci_info = {
+        .id = findVehicleTypeIndex(vType),
+        .lane = lane,
+        .position = static_cast<float>(position),
+    };
+    traci_info.speed = (float) speed;
+    traci_info.ccDesiredSpeed = desiredSpeed;
+    this->addVehicleToQueue(route, traci_info);
 }
 
 void DebugTrafficManager::parseCarPositions(std::string parstringpos)
@@ -72,28 +130,28 @@ void DebugTrafficManager::handleSelfMsg(cMessage* msg)
             lane = 0;
             parseCarPositions(s);
             for (auto carpos : carPositions)
-                insertCar(std::string("E0"), lane, insertSpeed, uniform(minSpeed, maxSpeed), true, carpos);
+                insertCar(std::string("platoon_route"), lane, insertSpeed, uniform(minSpeed, maxSpeed), true, carpos);
         }
         s = par("carPositions1").stringValue();
         if (!s.empty()) {
             lane = 1;
             parseCarPositions(s);
             for (auto carpos : carPositions)
-                insertCar(std::string("E0"), lane, insertSpeed, uniform(minSpeed, maxSpeed), true, carpos);
+                insertCar(std::string("platoon_route"), lane, insertSpeed, uniform(minSpeed, maxSpeed), true, carpos);
         }
         s = par("carPositions2").stringValue();
         if (!s.empty()) {
             lane = 2;
             parseCarPositions(s);
             for (auto carpos : carPositions)
-                insertCar(std::string("E0"), lane, insertSpeed, uniform(minSpeed, maxSpeed), true, carpos);
+                insertCar(std::string("platoon_route"), lane, insertSpeed, uniform(minSpeed, maxSpeed), true, carpos);
         }
         s = par("carPositions3").stringValue();
         if (!s.empty()) {
             lane = 3;
             parseCarPositions(s);
             for (auto carpos : carPositions)
-                insertCar(std::string("E0"), lane, insertSpeed, uniform(minSpeed, maxSpeed), true, carpos);
+                insertCar(std::string("platoon_route"), lane, insertSpeed, uniform(minSpeed, maxSpeed), true, carpos);
         }
     }
 }

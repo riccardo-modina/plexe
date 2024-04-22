@@ -33,6 +33,11 @@ protected:
     virtual void handleSelfMsg(cMessage* msg) override;
     void parseCarPositions(std::string parstringpos);
     void insertCar(std::string route, int lane, double speed, double desiredSpeed, bool isCommEnabled, double position);
+    void insertRVCar(std::string route, int lane, double speed,
+        double desiredSpeed, double position, std::string vType);
+    void insertHumanCar(std::string route, int lane, double speed,
+        double desiredSpeed, double position, std::string vType);
+
 
 private:
     int vehicleId = 0;
