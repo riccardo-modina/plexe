@@ -26,18 +26,13 @@ protected:
     SimTime trafficInsertTime;
 
     double insertSpeed;
-    std::string platooningVType;
     std::string strCarPositions;
-    std::vector<double> carPositions;
+    std::vector<double> rCarPositions;
+    std::vector<double> hCarPositions;
 
     virtual void handleSelfMsg(cMessage* msg) override;
-    void parseCarPositions(std::string parstringpos);
-    void insertCar(std::string route, int lane, double speed, double desiredSpeed, bool isCommEnabled, double position);
-    void insertRVCar(std::string route, int lane, double speed,
-        double desiredSpeed, double position, std::string vType);
-    void insertHumanCar(std::string route, int lane, double speed,
-        double desiredSpeed, double position, std::string vType);
-
+    void parseCarPositionsAndInsert(std::string parstringpos, int lane, double minSpeed, double maxSpeed);
+    void insertCar(std::string route, int lane, double speed, double desiredSpeed, double position, std::string vtype);
 
 private:
     int vehicleId = 0;
