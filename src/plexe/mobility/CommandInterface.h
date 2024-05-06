@@ -185,8 +185,9 @@ public:
          */
         std::vector<std::pair<std::string, std::vector<double>>>
         getRadarMeasurements(double& distance, double& relativeSpeed);
-        void setNoisyRadarModelParams(bool useNoisyRadarModel = true, std::string distrib = "gaussian", double maxrange = 150.0,
-            double maxangle = 70.0, double meanDist = 0.0, double sdDist = 0.2, double meanVel = 0.0, double sdVel = 0.1);
+        void setNoisyRadarModelParams(bool useNoisyRadarModel = true, std::string distrib = "gaussian",
+            unsigned int seed = 12345, double maxrange = 150.0, double maxangle = 70.0,
+            double meanDist = 10.0, double sdDist = 0.2, double meanVel = 0.0, double sdVel = 0.1);
 
         void setLeaderVehicleFakeData(double controllerAcceleration, double acceleration, double speed);
         void setLeaderFakeData(double leaderSpeed, double leaderAcceleration);

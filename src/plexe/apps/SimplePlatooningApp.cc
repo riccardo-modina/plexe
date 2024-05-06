@@ -30,13 +30,12 @@ void SimplePlatooningApp::initialize(int stage)
 {
     BaseApp::initialize(stage);
     if (stage == 2) {
-        //accumulatedResults.clear();
+
+        auto manager = getModuleByPath("<root>.manager");
         std::string sumoid = positionHelper->getExternalId();
-        //if (sumoid == "vtypeauto.0") {
-            plexeTraciVehicle->setNoisyRadarModelParams(); // con param Default
-            sampleMsg = new cMessage("Getting infos from the radar");
-            scheduleAt(5.0, sampleMsg);
-        //}
+        plexeTraciVehicle->setNoisyRadarModelParams(true, "gaussian", (unsigned int) manager->par("seed").intValue());
+        sampleMsg = new cMessage("Getting infos from the radar");
+        scheduleAt(5.0, sampleMsg);
     }
 }
 
