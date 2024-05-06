@@ -54,6 +54,8 @@ void SimplePlatooningApp::handleSelfMsg(cMessage* msg)
 
         //Add the simulation Time at accumulatedResults
         accumulatedResults.insert(accumulatedResults.end(), rm.begin(), rm.end());
+    } else {
+        BaseApp::handleSelfMsg(msg);
     }
 }
 
