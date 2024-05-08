@@ -262,7 +262,7 @@ std::vector<std::pair<std::string, std::vector<double>>> CommandInterface::Vehic
         std::string vehId;
         std::vector<double> record;
         while(elem != "") {
-            std::cout << "\t* parsing buffer.next() = " << elem << std::endl;
+            //std::cout << "\t* parsing buffer.next() = " << elem << std::endl;
             if (readCount == 0)
                 vehId = elem;
             else if (readCount < 7) {

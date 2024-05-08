@@ -33,7 +33,8 @@ void SimplePlatooningApp::initialize(int stage)
 
         auto manager = getModuleByPath("<root>.manager");
         std::string sumoid = positionHelper->getExternalId();
-        plexeTraciVehicle->setNoisyRadarModelParams(true, "gaussian", (unsigned int) manager->par("seed").intValue());
+        unsigned int seed = (unsigned int) manager->par("seed").intValue() + myId;
+        plexeTraciVehicle->setNoisyRadarModelParams(true, "gaussian", seed);
         sampleMsg = new cMessage("Getting infos from the radar");
         scheduleAt(5.0, sampleMsg);
     }
@@ -43,7 +44,7 @@ void SimplePlatooningApp::handleSelfMsg(cMessage* msg)
 {
     if (msg == sampleMsg) {
         scheduleAt(simTime() + 0.1, sampleMsg);
-        std::cout << "Sampling with the radar of: " << positionHelper->getExternalId() << std::endl;
+        //std::cout << "Sampling with the radar of: " << positionHelper->getExternalId() << std::endl;
         double dist, relSp;
 
         resMap rm = plexeTraciVehicle->getRadarMeasurements(dist, relSp);
