@@ -8,6 +8,7 @@ simple DebugTrafficManager extends BTraCIBaseTrafficManager {
         // double insertionHeadwayTime @unit("s");
         // double minInsertionSpace @unit("m") = default(6m);
         double insertionSpeed @unit("kmph") = default(90 kmph);
+        string platooningVType = default("vtypeauto");
         string radarVType = default("vtypeauto");
         string humanVType = default("vtypehuman");
         string carPositions0 = default("15.0 10.0");

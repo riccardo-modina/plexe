@@ -101,6 +101,8 @@ protected:
     virtual void handleSelfMsg(cMessage* msg) override;
     virtual void handleLowerControl(cMessage* msg) override;
 
+    virtual void onPlatoonBeacon(const PlatooningBeacon* pb);
+
     /**
      * Tells this application to log mobility data about the vehicles
      */

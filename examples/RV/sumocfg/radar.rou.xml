@@ -1,0 +1,24 @@
+<routes>
+    <vType id="vtypeauto" accel="2.5" decel="9.0" sigma="0.5" length="4" minGap="0" maxSpeed="1000" color="1,0,0" probability="1" speedFactor="2"
+        carFollowModel="CC" tauEngine="0.5" omegaN="0.2" xi="1" c1="0.5" lanesCount="3" ccAccel="1.5" ploegKp="0.2" ploegKd="0.7" ploegH="0.5" />
+    <vType id="vtypehuman" accel="2.5" decel="6.0" sigma="0.5" length="4" minGap="0" maxSpeed="27.77778" color="0,0,1" probability="1" />
+    <route id="platoon_route" edges="E0 E1 E2 E3 E4 E5 E6 E7 E8 E9 E10 E11 E12 E13 E14 E15 E16 E17 E19 E20 absorption_4"/>
+    <!--<flow id="platoon" route="platoon_route" type="vtypeauto" begin="0" period="1" departLane="0" number="8" departSpeed="27.77"/>-->
+   
+   
+   <!--vType id="vtype0" accel="2.5" decel="9.0" sigma="0.5" length="4" minGap="0" maxSpeed="42" color="1,0,0" probability="1" tau="2.0"
+        carFollowModel="CC" tauEngine="0.5" omegaN="0.2" xi="1" c1="0.5" lanesCount="3" ccAccel="1.5" ploegKp="0.2" ploegKd="0.7" ploegH="0.5" />
+   <vType id="vtype1" accel="3" decel="4" sigma="0.5" length="4" maxSpeed="60"/>
+   <vType id="vtype3" accel="3" decel="4" sigma="0.5" length="4" maxSpeed="60"/>
+   <vType id="vtype2" accel="2" decel="5" sigma="0.5" length="5" maxSpeed="28" /-->
+   
+   <!--vehicle id="RV" type="vtypeauto" route="route0" depart="0" departLane="1" departPos="25" departSpeed="8" arrivalLane="first" color="0,1,1"/>
+   <vehicle id="V1" type="vtypehuman" route="route0" depart="0" departLane="0" departPos="5" departSpeed="8" arrivalLane="first"/>
+   <vehicle id="V2" type="vtypehuman" route="route0" depart="0" departLane="1" departPos="5" departSpeed="8" arrivalLane="first"/>
+   <vehicle id="V3" type="vtypehuman" route="route0" depart="0" departLane="2" departPos="5" departSpeed="8" arrivalLane="first"/>
+   <vehicle id="V4" type="vtypehuman" route="route0" depart="0" departLane="0" departPos="50" departSpeed="8" arrivalLane="first"/>
+   <vehicle id="V5" type="vtypehuman" route="route0" depart="0" departLane="1" departPos="50" departSpeed="8" arrivalLane="first"/>
+   <vehicle id="V6" type="vtypehuman" route="route0" depart="0" departLane="2" departPos="50" departSpeed="8" arrivalLane="first"/-->
+
+</routes>
+

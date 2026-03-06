@@ -1,0 +1,6 @@
+d ./run -u Cmdenv -c SinusoidalNoGui -r 2
+d ./run -u Cmdenv -c SinusoidalNoGui -r 4
+d ./run -u Cmdenv -c SinusoidalNoGui -r 0
+d ./run -u Cmdenv -c SinusoidalNoGui -r 3
+d ./run -u Cmdenv -c SinusoidalNoGui -r 1
+d ./run -u Cmdenv -c SinusoidalNoGui -r 5
