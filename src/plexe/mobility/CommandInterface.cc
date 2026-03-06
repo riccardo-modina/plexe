@@ -250,12 +250,47 @@ void CommandInterface::Vehicle::setFixedLane(int8_t laneIndex, bool safe)
     }
 }
 
-void CommandInterface::Vehicle::getRadarMeasurements(double& distance, double& relativeSpeed)
+std::vector<std::pair<std::string, std::vector<double>>> CommandInterface::Vehicle::getRadarMeasurements(double& distance, double& relativeSpeed)
 {
+    std::vector<std::pair<std::string, std::vector<double>>> resMap;
     std::string v;
     veinsVehicle().getParameter(PAR_RADAR_DATA, v);
     ParBuffer buf(v);
     buf >> distance >> relativeSpeed;
+    std::string elem = buf.next();
+    if (elem == "")
+        return resMap;
+    else {
+        //noisyRadar was active, extract more data!
+        int readCount = 0; // we have an ID + 6 doubles to read
+        std::string vehId;
+        std::vector<double> record;
+        while(elem != "") {
+            //std::cout << "\t* parsing buffer.next() = " << elem << std::endl;
+            if (readCount == 0)
+                vehId = elem;
+            else if (readCount < 7) {
+                record.push_back(std::stod(elem));
+            }
+            readCount++;
+            if (readCount == 7) {
+                resMap.push_back(std::make_pair(vehId, record));
+                readCount = 0;
+                record.clear();
+            }
+            elem = buf.next();
+        }
+        return resMap;
+    }
+}
+
+void CommandInterface::Vehicle::setNoisyRadarModelParams(bool useNoisyRadarModel,
+    std::string distrib, unsigned int seed, double maxrange, double maxangle,
+    double meanDist, double sdDist, double meanVel, double sdVel)
+{
+    ParBuffer buf;
+    buf << useNoisyRadarModel << distrib << seed << maxrange << maxangle << meanDist << sdDist << meanVel << sdVel;
+    veinsVehicle().setParameter(PAR_NOISY_RADAR_MODEL_DATA, buf.str());
 }
 
 void CommandInterface::Vehicle::setLeaderVehicleFakeData(double controllerAcceleration, double acceleration, double speed)

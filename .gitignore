@@ -1,3 +1,7 @@
+.csettings/
+.idea/
+.settings/
+
 src/Makefile
 src/scripts/__pycache__/
 src/*.so

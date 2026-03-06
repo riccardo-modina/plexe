@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "Compiling PLEXE..."
+
+cd $PLEXE_DIR
+
+./configure
+
+make -j $(nproc) #MODE=debug
+
+cd -
+

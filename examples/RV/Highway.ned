@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2012-2025 Michele Segata <segata@ccs-labs.org>
+// Copyright (C) 2008 Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
+// Copyright (C) 2012-2023 Michele Segata <segata@ccs-labs.org>
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 //
@@ -18,20 +19,13 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package org.car2x.plexe.apps;
+import org.car2x.plexe.PlexeScenario;
 
-import org.car2x.plexe.apps.BaseApp;
-
-simple SimplePlatooningApp like BaseApp
+network Highway extends PlexeScenario
 {
-    parameters:
-        int headerLength @unit("bit") = default(0 bit);
-        string outputcsv = default("radar.csv");
-        @display("i=block/app2");
-        @class(plexe::SimplePlatooningApp);
-    gates:
-        input lowerLayerIn;
-        output lowerLayerOut;
-        input lowerControlIn;
-        output lowerControlOut;
+
+    submodules:
+        human[0]: HumanCar {
+        }
+
 }

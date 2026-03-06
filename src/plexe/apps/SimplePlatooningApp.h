@@ -20,7 +20,12 @@
 
 #pragma once
 
+#ifndef SIMPLEPLATOONINGAPP_H_
+#define SIMPLEPLATOONINGAPP_H_
+
 #include "plexe/apps/BaseApp.h"
+
+using resMap = std::vector<std::pair<std::string, std::vector<double>>>;
 
 namespace plexe {
 
@@ -30,9 +35,14 @@ public:
     SimplePlatooningApp()
     {
     }
+    
     virtual void initialize(int stage) override;
+    virtual void finish() override;
+
+    int numInitStages() const override { return 3; }
 
 protected:
+    //local
     virtual void handleLowerMsg(cMessage* msg) override;
 
     /**
@@ -40,6 +50,12 @@ protected:
      */
     virtual void onPlatoonBeacon(const PlatooningBeacon* pb);
 
+    //radarmattia
+    cMessage* sampleMsg;
+    resMap accumulatedResults;
+    virtual void handleSelfMsg(cMessage* msg) override;
 };
 
 } // namespace plexe
+
+#endif /* SIMPLEPLATOONINGAPP_H_ */
