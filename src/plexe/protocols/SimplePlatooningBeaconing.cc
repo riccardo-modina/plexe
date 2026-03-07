@@ -22,7 +22,7 @@
 
 namespace plexe {
 
-Define_Module(SimplePlatooningBeaconing)
+Define_Module(SimplePlatooningBeaconing);
 
 void SimplePlatooningBeaconing::initialize(int stage)
 {
