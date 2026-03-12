@@ -19,7 +19,7 @@ if ! [[ "$WINDOW_WIDTH" =~ ^[0-9]+$ ]] || [ "$WINDOW_WIDTH" -lt 1 ] || [ "$WINDO
 fi
 
 # Validate window style
-if [[ "$WINDOW_STYLE" != "sliding" && "$POLICY" != "jumping" ]]; then
+if [[ "$WINDOW_STYLE" != "sliding" && "$WINDOW_STYLE" != "jumping" ]]; then
     echo "Error: WINDOW_STYLE must be one of: sliding, jumping"
     exit 3
 fi
