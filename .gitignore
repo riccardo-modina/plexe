@@ -1,6 +1,9 @@
 .csettings/
 .idea/
 .settings/
+.project
+.cproject
+.cjproject
 
 src/Makefile
 src/scripts/__pycache__/
@@ -9,6 +12,12 @@ src/*.dll
 src/*.dylib
 src/**/*_m.h
 src/**/*_m.cc
+
+Debug/
+**/__pycache__/
+venv_training/
+**/Data/
+**/figures/
 
 doc/doxy
 doc/neddoc
