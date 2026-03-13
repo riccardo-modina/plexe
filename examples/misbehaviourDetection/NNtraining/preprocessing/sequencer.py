@@ -15,12 +15,20 @@ def normalize_sequence(sequence_df):
     """
     Apply a transformation where the first row of the sequence is used
     as a reference and subtracted from all rows in the sequence.
-    Then apply the labeling policy.
+    Only kinematic features are normalized; labels are preserved.
     """
-    # Subtract the first row from all rows, column-wise
-    ref_row = sequence_df.iloc[0]
-    # "Progressive kinematic differences"
-    normalized_sequence = sequence_df - ref_row
+    # Create a copy to avoid SettingWithCopy warnings
+    normalized_sequence = sequence_df.copy()
+    
+    # Define only the numerical/kinematic columns that need normalization so we can avoid the label being normalized 
+    cols_to_norm = ['sendTime', 'posx', 'posy', 'spdx', 'spdy', 'acl']
+    
+    # Get the reference values from the first row
+    ref_values = sequence_df.iloc[0][cols_to_norm]
+    
+    # Subtract the reference only from the specific columns
+    normalized_sequence[cols_to_norm] = sequence_df[cols_to_norm] - ref_values
+    
     return normalized_sequence
 
 def label_sequence(sequence_df, policy, trainingFeatures):

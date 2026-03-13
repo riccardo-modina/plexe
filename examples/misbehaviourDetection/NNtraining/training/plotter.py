@@ -14,30 +14,37 @@ plt.rcParams['text.usetex'] = True
 
 # Metrics
 metrics = ['precision', 'recall', 'f1-score']
-labels = [r"$gen$", r"$C_{pos}$", r"$R_{pos}$", r"$O_{pos}$", r"$R_{spd}$", r"$O_{spd}$", r"$EvSt$", r"$Dis$", r"$D_{rep}$"]
+# Etichette originali
+all_labels = ["gen", "C_pos", "R_pos", "O_pos", "R_spd", "O_spd", "EvSt", "Dis", "D_rep"]
 binlabels = ["Genuine", "Malicious"]
 
 ############################################
 # Load plottable data
-
 PLOTTABLE_FILE = sys.argv[1]
 saveas = PLOTTABLE_FILE.split("/")[-1].replace("plottable_", "").replace(".pkl", "")
 
-f = open(PLOTTABLE_FILE, 'rb')
-history, yt, yp = pickle.load(f)
+with open(PLOTTABLE_FILE, 'rb') as f:
+    history, yt, yp = pickle.load(f)
 
+# Dynamic report evaluation
 report = classification_report(yt, yp, output_dict=True)
 rdf = pd.DataFrame(report).transpose()
-rdf = rdf.iloc[0:9,:-1]
+
+# Considering only numeric classes present in the test
+# (exluding for example 'accuracy', 'macro avg', ecc.)
+actual_class_indices = [int(i) for i in rdf.index if i.isdigit()]
+rdf = rdf.loc[[str(i) for i in actual_class_indices]]
+
+# Tag filter
+labels = [all_labels[i] for i in actual_class_indices]
+NUMLABELS = len(actual_class_indices)
 
 # create data
-NUMLABELS=9
 x = np.arange(NUMLABELS)
-yprec = rdf.precision
-yrec = rdf.recall
-yf1 = rdf['f1-score']
+yprec = rdf.precision.values
+yrec = rdf.recall.values
+yf1 = rdf['f1-score'].values
 width = 0.2
-
 
 os.makedirs("figures", exist_ok=True)
 
