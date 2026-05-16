@@ -60,3 +60,5 @@ subprojects/**/examples/**/valgrind.out
 **/__MACOSX/
 **/Data.zip
 **/*-Linux-x86_64.sh
+
+*.pkl
