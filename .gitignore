@@ -53,3 +53,10 @@ subprojects/**/examples/**/valgrind.out
 **.vci
 **.csv
 **.sca
+**.o
+**.save
+**.swp
+.DS_Store
+**/__MACOSX/
+**/Data.zip
+**/*-Linux-x86_64.sh
