@@ -7,9 +7,7 @@ from new_sequencer import Sequencer
 from rule_mds import Rulemds
 from ai_mds import Aimds
 import numpy as np
-
-import code  # code.interact(local=dict(globals(), **locals()))
-
+from replay_detector import DataReplayDetector
 
 DECIDER_THRESHOLD = 0
 
@@ -20,6 +18,18 @@ def process_file(args):
 
     rmds = Rulemds(ARTenabled)
     aimds = Aimds(model_path, scaler_path, MCdropRep, MCdropCU)
+
+    # Sort the entire df chronologically to simulate packet arrival order,
+    # because it is needed to evaluate the DataReplayDetector to avoid unordered CAM save in the list
+    df_sorted = sqnr.seldf.sort_values('sendTime')
+
+    # Run the DataReplayDetector over the sorted df, 5.0s is the time window of the CAM keeped in the list
+    replay_detector = DataReplayDetector(window_time=5.0)
+    replay_flags = {}
+    
+    for idx, row in df_sorted.iterrows():
+        is_replay = replay_detector.evaluate(row, row['veh'])
+        replay_flags[idx] = is_replay
 
     mds_results = []
     groups = sqnr.seldf.groupby(['sender', 'veh'])
@@ -56,7 +66,19 @@ def process_file(args):
 
             # CONFIDENCES SCORE FUSION
             mds_out = CSF(lr, cr, lai, cai)
-            pred = 1 if mds_out > DECIDER_THRESHOLD else 0
+
+            # Find the corresponding original index of this message in sqnr.seldf
+            msg_send_time = msg[0]
+            matched_rows = gr[gr.sendTime == msg_send_time]
+            is_replay_detected = False
+            if not matched_rows.empty:
+                orig_idx = matched_rows.index[0]
+                is_replay_detected = replay_flags.get(orig_idx, False)
+
+            if is_replay_detected:
+                pred = 1
+            else:
+                pred = 1 if mds_out > DECIDER_THRESHOLD else 0
 
             dicts = [{'tl': y, 'mdspl': pred, 'mdso': mds_out, 'lr': lr, 'cr': cr, 'lai': lai,
                       'cai': cai, 'muai': mu, 'CLai': CL, 'nblai': nonbinlai}, metrics, scores, errors]
