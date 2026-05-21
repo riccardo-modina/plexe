@@ -47,7 +47,13 @@ def accuracyBarChart(yt, yp, prefix, colors=colors, NUMLABELS=9):
 
     report = classification_report(y_true_clean, y_pred_clean, output_dict=True)
     rdf = pd.DataFrame(report).transpose()
-    rdf = rdf.iloc[0:NUMLABELS,:-1]
+
+    # Change in the indexing to allow plot of subset of attacks
+    # Original code:
+    # rdf = rdf.iloc[0:NUMLABELS,:-1]
+    class_keys = [str(i) for i in range(NUMLABELS)]
+    rdf = rdf.reindex(class_keys)
+    rdf = rdf.iloc[:, :-1]
 
     lbls = labels
     legendXOffset = 0
