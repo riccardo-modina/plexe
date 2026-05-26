@@ -425,7 +425,7 @@ void DefenseApp::onPlatoonBeacon(const CAM* cam)
         
         // Data Replay Detector
         size_t payloadHash = calculatePayloadHash(cam);
-        bool isReplay = !camMemoryMap.add(payloadHash, simTime().dbl());
+        bool isReplay = !camMemoryMap.add(payloadHash, cam->getVehicleId(), simTime().dbl());
 
         if (isReplay) {
             attack = true;
