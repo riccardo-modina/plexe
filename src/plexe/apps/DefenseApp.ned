@@ -36,6 +36,7 @@ simple DefenseApp extends SimplePlatooningApp
         double MCdropCU = default(0.1);
         double smoothingFactor = default(0.5);
         double maxCamAge @unit("s") = default(1 s);
+        double maxAgeCAMReplayDetection @unit("s") = default(5 s);
 
         @signal[aidaId](type="long");
         @statistic[aidaId](source="aidaId"; record=vector);

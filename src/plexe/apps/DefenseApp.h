@@ -33,6 +33,7 @@
 #include "plexe/apps/SimplePlatooningApp.h"
 #include "plexe/traffic/MisbeTrafficManager.h"
 #include "plexe/utilities/RotationLog.h"
+#include "plexe/utilities/CAMMemoryMap.h"
 #include "plexe/apps/Heuristic.h"
 #include <unordered_map>
 #include <vector>
@@ -74,8 +75,11 @@ class MisbehaviorScenario;
 class DefenseApp : public SimplePlatooningApp {
 private:
     std::unordered_map<int, RotationLog> beaconBuffer;
+    CAMMemoryMap camMemoryMap;
+    size_t calculatePayloadHash(const CAM* cam);
 	int bufferSize;
 	double maxCamAge;
+	double maxAgeCAMReplayDetection;
 	int bitmask;
 	std::map<int, double> smoothed_scores;
 	static bool systemIsSafe;
