@@ -33,12 +33,6 @@ class DataReplayDetector:
         key = (msg['posx'], msg['posy'], msg['spdx'], msg['spdy'], msg['acl'], msg['hed'])
         
         if key in overflow_bucket:
-            old = overflow_bucket[key]
-            # Different sender
-            if old['sender'] != msg['sender']:
-                return True
-            # Same sender, but old or duplicate timestamp
-            elif msg['rcvTime'] <= old['rcvTime']:
                 return True
         else:
             overflow_bucket[key] = {
