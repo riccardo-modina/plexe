@@ -4,7 +4,7 @@ from pathlib import Path
 import code #code.interact(local=dict(globals(), **locals()))
 import math
 
-columns_keep = ['sendTime', 'sender', 'senderPseudo', 'posx', 'posy', 'spdx', 'spdy', 'acl', 'hed', 'messageID']
+columns_keep = ['rcvTime','sendTime', 'sender', 'senderPseudo', 'posx', 'posy', 'spdx', 'spdy', 'acl', 'hed', 'messageID']
 
 def euclidean_norm(x, y):
     return math.sqrt(math.pow(x,2) + math.pow(y,2))
@@ -27,7 +27,8 @@ def process_dataframe(df):
     df['acl'] = df['acl'].apply(lambda x: euclidean_norm(x[0], x[1]))
     df['acl'] = df.apply(
         lambda row: -row['acl'] if abs(row['hed'] - row['acl_angle']) > 90 else row['acl'], axis=1)
-    return df[columns_keep]
+    cols = [col for col in columns_keep if col in df.columns]
+    return df[cols]
 
 def json_to_parquet(file_path):
     try:
