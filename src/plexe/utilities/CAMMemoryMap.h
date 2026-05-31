@@ -38,14 +38,7 @@ public:
     bool add(size_t key, int sender, double timestamp) {
         auto it = memoryMap.find(key);
         if (it != memoryMap.end()) {
-            if (it->second.sender != sender) {
-                return false; // attack: different sender
-            }
-            if (timestamp <= it->second.timestamp) {
-                return false; // attack: older/duplicate timestamp
-            }
-            it->second.timestamp = timestamp;
-            return true;
+            return false; // attack: payload hash already present
         }
         memoryMap[key] = {sender, timestamp};
         return true;

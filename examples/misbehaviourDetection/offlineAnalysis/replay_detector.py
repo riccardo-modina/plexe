@@ -33,7 +33,7 @@ class DataReplayDetector:
         key = (msg['posx'], msg['posy'], msg['spdx'], msg['spdy'], msg['acl'], msg['hed'])
         
         if key in overflow_bucket:
-                return True
+            return True
         else:
             overflow_bucket[key] = {
                 'sender': msg['sender'],
