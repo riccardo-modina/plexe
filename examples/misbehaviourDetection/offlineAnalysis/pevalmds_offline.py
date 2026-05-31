@@ -21,7 +21,7 @@ def process_file(args):
 
     # Sort the entire df chronologically to simulate packet arrival order,
     # because it is needed to evaluate the DataReplayDetector to avoid unordered CAM save in the list
-    df_sorted = sqnr.seldf.sort_values('sendTime')
+    df_sorted = sqnr.seldf.sort_values('rcvTime')
 
     # Run the DataReplayDetector over the sorted df, 5.0s is the time window of the CAM keeped in the list
     replay_detector = DataReplayDetector(window_time=5.0)

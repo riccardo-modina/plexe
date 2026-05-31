@@ -7,12 +7,12 @@ class DataReplayDetector:
     def __init__(self, window_time=5.0):
         self.window_time = window_time
         # The overflow bucket uses the payload's hash as a key
-        # { receiver_veh: { (posx, posy, spdx, spdy, acl, hed): { 'sender': sender, 'sendTime': sendTime } } }
+        # { receiver_veh: { (posx, posy, spdx, spdy, acl, hed): { 'sender': sender, 'rcvTime': rcvTime } } }
         self.overflow_buckets = {}
 
     def evaluate(self, msg, rxVehID):
        
-        # msg: contains the fields: 'posx', 'posy', 'spdx', 'spdy', 'acl', 'hed', 'sender', 'sendTime'
+        # msg: contains the fields: 'posx', 'posy', 'spdx', 'spdy', 'acl', 'hed', 'sender', 'rcvTime'
         # rxVehID: reciver vehicle ID
         
         # return true if a replay attack is detected
@@ -21,10 +21,10 @@ class DataReplayDetector:
             self.overflow_buckets[rxVehID] = {}
         
         overflow_bucket = self.overflow_buckets[rxVehID]
-        current_time = msg['sendTime']
+        current_time = msg['rcvTime']
         
         # Clean the overflow bucket of this receiver from elements older than window_time
-        self.overflow_buckets[rxVehID] = {k: v for k, v in overflow_bucket.items() if (current_time - v['sendTime']) <= self.window_time}
+        self.overflow_buckets[rxVehID] = {k: v for k, v in overflow_bucket.items() if (current_time - v['rcvTime']) <= self.window_time}
         overflow_bucket = self.overflow_buckets[rxVehID]
         
         # Implicit Hash that will be used as key:
@@ -38,11 +38,11 @@ class DataReplayDetector:
             if old['sender'] != msg['sender']:
                 return True
             # Same sender, but old or duplicate timestamp
-            elif msg['sendTime'] <= old['sendTime']:
+            elif msg['rcvTime'] <= old['rcvTime']:
                 return True
         else:
             overflow_bucket[key] = {
                 'sender': msg['sender'],
-                'sendTime': msg['sendTime']
+                'rcvTime': msg['rcvTime']
             }
         return False
