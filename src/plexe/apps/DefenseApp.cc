@@ -423,9 +423,12 @@ void DefenseApp::onPlatoonBeacon(const CAM* cam)
 
     if (currentState == FOLLOWING and systemIsSafe) {
         
-        // Data Replay Detector
-        size_t payloadHash = calculatePayloadHash(cam);
-        bool isReplay = !camMemoryMap.add(payloadHash, simTime().dbl());
+        bool isReplay = false;
+        if (defenseEnabled == FULL) {
+            // Data Replay Detector
+            size_t payloadHash = calculatePayloadHash(cam);
+            isReplay = !camMemoryMap.add(payloadHash, simTime().dbl());
+        }
 
         if (isReplay) {
             attack = true;
