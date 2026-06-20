@@ -42,7 +42,7 @@ void SimplePlatooningApp::initialize(int stage)
         auto manager = getModuleByPath("<root>.manager");
         std::string sumoid = positionHelper->getExternalId();
         unsigned int seed = (unsigned int) manager->par("seed").intValue() + myId;
-        plexeTraciVehicle->setNoisyRadarModelParams(true, "gaussian", seed);
+        plexeTraciVehicle->setNoisyRadarModelParams(false, "gaussian", seed);
         sampleMsg = new cMessage("Getting infos from the radar");
         scheduleAt(5.0, sampleMsg);
     }
