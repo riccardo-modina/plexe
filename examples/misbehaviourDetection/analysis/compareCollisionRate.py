@@ -13,7 +13,14 @@ CRASHEDCSVFILE = sys.argv[1]
 
 outname = CRASHEDCSVFILE.replace(".csv", ".pdf")
 
-NUMEXPxMISTYPEandDef = 300
+# Get number of simulations per combination from 2nd argument (default: 300)
+# Example of use: python3 compareCollisionRate.py crashed.csv 30
+NUMEXPxMISTYPEandDef = 300.0
+if len(sys.argv) > 2:
+    try:
+        NUMEXPxMISTYPEandDef = float(sys.argv[2])
+    except ValueError:
+        print(f"Warning: Could not parse '{sys.argv[2]}' as a number. Using default {NUMEXPxMISTYPEandDef}.")
 
 
 
