@@ -26,6 +26,7 @@
 #define HEUADV "heuadv"
 #define NNDEF "NNdef"
 #define FULL "full"
+#define DRD "drd"
 
 #define DECIDER_THRESHOLD 0
 

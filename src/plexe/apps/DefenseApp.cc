@@ -78,7 +78,7 @@ void DefenseApp::initialize(int stage)
         traffic = FindModule<MisbeTrafficManager*>::findGlobalModule();
         plexeTraciVehicle->useRadar(radar);
         protocol->setWarning(false);
-        if (defenseEnabled == NNDEF or defenseEnabled == FULL)
+        if (defenseEnabled == NNDEF or defenseEnabled == FULL or defenseEnabled == DRD)
             nn_wrapper = new NNWrapper(model_path, scaler_path, par("MCdropRep").intValue(), par("MCdropCU").doubleValue());
         misbehaveTime = traffic->par("timeMisbehavior").doubleValue();
     }
@@ -91,7 +91,7 @@ void DefenseApp::initialize(int stage)
 DefenseApp::~DefenseApp()
 {
     cancelAndDelete(updateGapMsg);
-    if (defenseEnabled == NNDEF or defenseEnabled == FULL)
+    if (defenseEnabled == NNDEF or defenseEnabled == FULL or defenseEnabled == DRD)
         delete nn_wrapper;
 }
 
@@ -232,7 +232,7 @@ bool DefenseApp::managePrediction(const CAM* cam, LOGGING_STRUCT& log)
 	    std::vector<const CAM*> ordMsgs = beaconLog.getOrderedMessages();
 	    log.nblai = nn_wrapper->predict(ordMsgs, log.nblai, log.cai, log.muai, log.CLai);
 		log.lai = (log.nblai == 0) ? 0 : 1;
-		if (defenseEnabled != FULL)
+		if (defenseEnabled != FULL and defenseEnabled != DRD)
 		    logPrediction(log, log.nblai);
 		if (log.nblai != 0 and log.nblai != -1 and defenseEnabled == NNDEF){
 		    detectionTime = simTime().dbl();
@@ -243,7 +243,7 @@ bool DefenseApp::managePrediction(const CAM* cam, LOGGING_STRUCT& log)
 		}
 	}
 
-	if (defenseEnabled != FULL)
+	if (defenseEnabled != FULL and defenseEnabled != DRD)
 	    logPrediction(log, log.nblai);
     return false;
 }
@@ -305,7 +305,7 @@ bool DefenseApp::evaluateBeaconPlausibility(const CAM* cam, LOGGING_STRUCT& log)
     int id = cam->getVehicleId();
 
     if (beaconBuffer[id].size() < 2) {
-        if (defenseEnabled != FULL)
+        if (defenseEnabled != FULL and defenseEnabled != DRD)
             logPrediction(log, log.lr); // we dont have enough beacons, emit -1 to say "no prediction"
         return false;
     }
@@ -347,7 +347,7 @@ bool DefenseApp::evaluateBeaconPlausibility(const CAM* cam, LOGGING_STRUCT& log)
         traffic->setReactionTime(detectionTime - misbehaveTime);
     }
 
-    if (defenseEnabled != FULL)
+    if (defenseEnabled != FULL and defenseEnabled != DRD)
         logPrediction(log, log.lr);
     return log.lr > 0;
 }
@@ -421,10 +421,11 @@ void DefenseApp::onPlatoonBeacon(const CAM* cam)
 
     log.predictedVeh = cam->getVehicleId();
 
+    bool isReplay = false;
+
     if (currentState == FOLLOWING and systemIsSafe) {
         
-        bool isReplay = false;
-        if (defenseEnabled == FULL) {
+        if (defenseEnabled == DRD) {
             // Data Replay Detector
             size_t payloadHash = calculatePayloadHash(cam);
             isReplay = !camMemoryMap.add(payloadHash, simTime().dbl());
@@ -454,7 +455,7 @@ void DefenseApp::onPlatoonBeacon(const CAM* cam)
                 else if (defenseEnabled == NNDEF) {  // AI-based defense
                     attack = managePrediction(cam, log);
                 }
-                else if (defenseEnabled == FULL) {  // Hybrid defense
+                else if (defenseEnabled == FULL || defenseEnabled == DRD) {  // Hybrid defense
                     bool heu_attack = evaluateBeaconPlausibility(cam, ruleLog);
                     bool ai_attack = managePrediction(cam, aiLog);
                     // Confidence-based Score Fusion
@@ -481,7 +482,12 @@ void DefenseApp::onPlatoonBeacon(const CAM* cam)
 
     camMemoryMap.garbageCollect(simTime().dbl(), maxAgeCAMReplayDetection);
 
-    SimplePlatooningApp::onPlatoonBeacon(cam);
+    if (isReplay) {
+        // Do not pass the replayed message to the CACC controller
+        delete cam;
+    } else {
+        SimplePlatooningApp::onPlatoonBeacon(cam);
+    }
 }
 
 size_t DefenseApp::calculatePayloadHash(const CAM* cam)
