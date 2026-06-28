@@ -40,3 +40,19 @@ subprojects/**/examples/**/valgrind.out
 **.vci
 **.csv
 **.sca
+
+# OMNeT++ / Eclipse files
+.cproject
+.project
+.oppbuildspec
+.nedfolders
+.csettings/
+.settings/
+
+# Unnecessary untracked files
+__MACOSX/
+__pycache__/
+*.o
+*.save
+*.zip
+Miniconda3*.sh
