@@ -27,6 +27,7 @@
 #define NNDEF "NNdef"
 #define FULL "full"
 #define DRD "drd"
+#define ONLYDRD "onlydrd"
 
 #define DECIDER_THRESHOLD 0
 
@@ -167,9 +168,6 @@ protected:
 
 	double misbehaveTime;
 	double detectionTime;
-
-    // DRD variables
-    std::map<int, double> drdFirstDetectionTime;
 
 	// activate the defense protocol in heuristic base defense, heuristic advanced defense, AI defense, or not
 	string defenseEnabled;

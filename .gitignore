@@ -14,6 +14,7 @@ doc/neddoc
 /out
 
 examples/**/results
+examples/misbehaviourDetection/oldres
 examples/**/.tkenvrc
 examples/**/.qtenvrc
 examples/**/.cmdenv-log

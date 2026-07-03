@@ -425,34 +425,28 @@ void DefenseApp::onPlatoonBeacon(const CAM* cam)
 
     if (currentState == FOLLOWING and systemIsSafe) {
         
-        if (defenseEnabled == DRD) {
+        if (defenseEnabled == DRD || defenseEnabled == ONLYDRD) {
             // Data Replay Detector
+            // hash computation
             size_t payloadHash = calculatePayloadHash(cam);
+
+            // garbage collection
+            camMemoryMap.garbageCollect(simTime().dbl(), maxAgeCAMReplayDetection);
+
+            // check if the beacon is already present, if true it's a replay attack (add returns true if added succesfully meaning no identic cam was recived in the window)
             isReplay = !camMemoryMap.add(payloadHash, simTime().dbl());
         }
 
         if (isReplay) {
-            // DRD Latency Experiment:
-            int vid = cam->getVehicleId();
-            if (drdFirstDetectionTime.find(vid) == drdFirstDetectionTime.end() || drdFirstDetectionTime[vid] < 0) {
-                drdFirstDetectionTime[vid] = simTime().dbl();
-                std::cout << "DRD TIMER PARTITO AL SECONDO: " << drdFirstDetectionTime[vid] << " (Vero attacco inizia a: " << misbehaveTime << ")" << std::endl;
-            }
+            attack = true;
 
-            // Only trigger attack if 0.4 seconds have passed since first detection
-            if (simTime().dbl() - drdFirstDetectionTime[vid] >= 0.39) {
-                attack = true;
-                
-                // Log prediction as attack
-                log.mdspl = 1;
-                detectionTime = simTime().dbl();
-                traffic->setReactionTime(detectionTime - misbehaveTime);
-                logPrediction(log, log.mdspl);
-            }
+            // Log prediction as attack
+            log.mdspl = 1;
+            detectionTime = simTime().dbl();
+            traffic->setReactionTime(detectionTime - misbehaveTime);
+            logPrediction(log, log.mdspl);
         }
-        else {
-            int vid = cam->getVehicleId();
-            drdFirstDetectionTime[vid] = -1.0;
+        else if (defenseEnabled != ONLYDRD) {
 
             // dont run any evaluation until you have at least a 5long full window of recent CAMs
             int id = cam->getVehicleId();
@@ -493,14 +487,8 @@ void DefenseApp::onPlatoonBeacon(const CAM* cam)
     // set the message to be replayed
     protocol->setReplayMessage(cam);
 
-    camMemoryMap.garbageCollect(simTime().dbl(), maxAgeCAMReplayDetection);
-
-    if (isReplay) {
-        // We removed 'delete cam' to ensure we behave exactly like FULL during the latency window
-        SimplePlatooningApp::onPlatoonBeacon(cam);
-    } else {
-        SimplePlatooningApp::onPlatoonBeacon(cam);
-    }
+    SimplePlatooningApp::onPlatoonBeacon(cam);
+    
 }
 
 size_t DefenseApp::calculatePayloadHash(const CAM* cam)
