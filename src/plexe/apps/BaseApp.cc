@@ -60,16 +60,12 @@ void BaseApp::finish()
     recordScalar("crashed", crashed);
 }
 
-#include <unistd.h>
-
 BaseApp::~BaseApp()
 {
     cancelAndDelete(recordData);
     recordData = nullptr;
     cancelAndDelete(stopSimulation);
     stopSimulation = nullptr;
-    // Delay destruction to give SUMO time to flush collision.xml after CMD_CLOSE
-    usleep(20000);
 }
 
 void BaseApp::handleLowerMsg(cMessage* msg)
