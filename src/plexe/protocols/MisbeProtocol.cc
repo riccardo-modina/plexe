@@ -15,10 +15,6 @@ Define_Module(MisbeProtocol);
 void MisbeProtocol::initialize(int stage)
 {
     SimplePlatooningBeaconing::initialize(stage);
-    if (stage == 0) {
-        memset(&replayData, 0, sizeof(replayData));
-        memset(&disruptiveData, 0, sizeof(disruptiveData));
-    }
 }
 
 void MisbeProtocol::handleSelfMsg(cMessage* msg)
@@ -235,19 +231,6 @@ void MisbeProtocol::setReplayMessage(const PlatooningBeacon* pb)
         replayData.speedY = pb->getSpeedY();
         replayData.angle = pb->getAngle();
     }
-}
-
-void MisbeProtocol::setDisruptiveMessage(const PlatooningBeacon* pb)
-{
-    disruptiveData.acceleration = pb->getAcceleration();
-    disruptiveData.length = pb->getLength();
-    disruptiveData.positionX = pb->getPositionX();
-    disruptiveData.positionY = pb->getPositionY();
-    disruptiveData.speed = pb->getSpeed();
-    disruptiveData.u = pb->getControllerAcceleration();
-    disruptiveData.speedX = pb->getSpeedX();
-    disruptiveData.speedY = pb->getSpeedY();
-    disruptiveData.angle = pb->getAngle();
 }
 
 } // namespace plexe

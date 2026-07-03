@@ -40,9 +40,6 @@ protected:
     struct VEHICLE_DATA replayData;
     int replayIndex;
 
-    // data saved to be replayed along with a random index
-    struct VEHICLE_DATA disruptiveData;
-
     virtual void initialize(int stage) override;
 
     virtual void handleSelfMsg(cMessage* msg) override;
@@ -88,8 +85,6 @@ public:
     void setReplayMessage(const PlatooningBeacon* pb);
     // set the index to replay in case of data replay attack
     void setReplayIndex(int index);
-    // set the message to be replayed in case of disruptive attack
-    void setDisruptiveMessage(const PlatooningBeacon* pb);
 };
 
 } // namespace plexe
