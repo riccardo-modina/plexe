@@ -15,6 +15,10 @@ Define_Module(MisbeProtocol);
 void MisbeProtocol::initialize(int stage)
 {
     SimplePlatooningBeaconing::initialize(stage);
+    if (stage == 0) {
+        memset(&replayData, 0, sizeof(replayData));
+        memset(&disruptiveData, 0, sizeof(disruptiveData));
+    }
 }
 
 void MisbeProtocol::handleSelfMsg(cMessage* msg)
@@ -33,30 +37,19 @@ void MisbeProtocol::handleSelfMsg(cMessage* msg)
             sendDisruptiveMessage(-1);
             scheduleAt(simTime() + beaconingInterval, sendBeacon);
         } else {
-            // generate random seed for the random attacks
-            std::random_device rd;
-            std::mt19937 gen(rd());
             if(strcmp(attackType, "randomPos") == 0){
-                std::uniform_int_distribution<> distr(lower_bound_random, upper_bound_random);
-
-                posx = distr(gen);
-                posy = distr(gen);
+                posx = intuniform(lower_bound_random, upper_bound_random);
+                posy = intuniform(lower_bound_random, upper_bound_random);
             }
             if(strcmp(attackType, "randomOffset") == 0){
-                std::uniform_int_distribution<> distr(lower_bound_offset, upper_bound_offset);
-
-                offset = distr(gen);
+                offset = intuniform(lower_bound_offset, upper_bound_offset);
             }
             if(strcmp(attackType, "randomSpeed") == 0){
-                std::uniform_int_distribution<> distr(lower_bound_random_speed, upper_bound_random_speed);
-
-                spdx = distr(gen);
-                spdy = distr(gen);
+                spdx = intuniform(lower_bound_random_speed, upper_bound_random_speed);
+                spdy = intuniform(lower_bound_random_speed, upper_bound_random_speed);
             }
             if(strcmp(attackType, "randomOffsetSpeed") == 0){
-                std::uniform_int_distribution<> distr(lower_bound_offset_speed, upper_bound_offset_speed);
-
-                offset = distr(gen);
+                offset = intuniform(lower_bound_offset_speed, upper_bound_offset_speed);
             }
             sendMisbehaviorMessage(-1);
             scheduleAt(simTime() + beaconingInterval, sendBeacon);
@@ -76,7 +69,7 @@ void MisbeProtocol::sendReplayMessage(int destinationAddress, enum PlexeRadioInt
 
 void MisbeProtocol::sendDisruptiveMessage(int destinationAddress, enum PlexeRadioInterfaces interfaces)
 {
-    sendTo(createReplayBeacon(destinationAddress, disruptiveData).release(), interfaces);
+    sendTo(createReplayBeacon(destinationAddress, replayData).release(), interfaces);
 }
 
 std::unique_ptr<BaseFrame1609_4> MisbeProtocol::createReplayBeacon(int destinationAddress, VEHICLE_DATA attackData)

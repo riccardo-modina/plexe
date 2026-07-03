@@ -26,6 +26,7 @@
 
 #include <math.h>
 #include <cmath>
+#include <sstream>
 
 using namespace veins;
 
@@ -47,6 +48,7 @@ void DefenseApp::initialize(int stage)
         radar = par("radar").boolValue();
         bufferSize = par("bufferSize").intValue();
         maxCamAge = par("maxCamAge").doubleValueInUnit("s");
+        maxAgeCAMReplayDetection = par("maxAgeCAMReplayDetection").doubleValueInUnit("s");
         bitmask = static_cast<uint8_t>(par("bitmask").intValue());
 
         aidaIdSignal = registerSignal("aidaId");
@@ -76,7 +78,7 @@ void DefenseApp::initialize(int stage)
         traffic = FindModule<MisbeTrafficManager*>::findGlobalModule();
         plexeTraciVehicle->useRadar(radar);
         protocol->setWarning(false);
-        if (defenseEnabled == NNDEF or defenseEnabled == FULL)
+        if (defenseEnabled == NNDEF or defenseEnabled == FULL or defenseEnabled == DRD)
             nn_wrapper = new NNWrapper(model_path, scaler_path, par("MCdropRep").intValue(), par("MCdropCU").doubleValue());
         misbehaveTime = traffic->par("timeMisbehavior").doubleValue();
     }
@@ -89,7 +91,7 @@ void DefenseApp::initialize(int stage)
 DefenseApp::~DefenseApp()
 {
     cancelAndDelete(updateGapMsg);
-    if (defenseEnabled == NNDEF or defenseEnabled == FULL)
+    if (defenseEnabled == NNDEF or defenseEnabled == FULL or defenseEnabled == DRD)
         delete nn_wrapper;
 }
 
@@ -230,7 +232,7 @@ bool DefenseApp::managePrediction(const CAM* cam, LOGGING_STRUCT& log)
 	    std::vector<const CAM*> ordMsgs = beaconLog.getOrderedMessages();
 	    log.nblai = nn_wrapper->predict(ordMsgs, log.nblai, log.cai, log.muai, log.CLai);
 		log.lai = (log.nblai == 0) ? 0 : 1;
-		if (defenseEnabled != FULL)
+		if (defenseEnabled != FULL and defenseEnabled != DRD)
 		    logPrediction(log, log.nblai);
 		if (log.nblai != 0 and log.nblai != -1 and defenseEnabled == NNDEF){
 		    detectionTime = simTime().dbl();
@@ -241,7 +243,7 @@ bool DefenseApp::managePrediction(const CAM* cam, LOGGING_STRUCT& log)
 		}
 	}
 
-	if (defenseEnabled != FULL)
+	if (defenseEnabled != FULL and defenseEnabled != DRD)
 	    logPrediction(log, log.nblai);
     return false;
 }
@@ -303,7 +305,7 @@ bool DefenseApp::evaluateBeaconPlausibility(const CAM* cam, LOGGING_STRUCT& log)
     int id = cam->getVehicleId();
 
     if (beaconBuffer[id].size() < 2) {
-        if (defenseEnabled != FULL)
+        if (defenseEnabled != FULL and defenseEnabled != DRD)
             logPrediction(log, log.lr); // we dont have enough beacons, emit -1 to say "no prediction"
         return false;
     }
@@ -345,7 +347,7 @@ bool DefenseApp::evaluateBeaconPlausibility(const CAM* cam, LOGGING_STRUCT& log)
         traffic->setReactionTime(detectionTime - misbehaveTime);
     }
 
-    if (defenseEnabled != FULL)
+    if (defenseEnabled != FULL and defenseEnabled != DRD)
         logPrediction(log, log.lr);
     return log.lr > 0;
 }
@@ -419,37 +421,70 @@ void DefenseApp::onPlatoonBeacon(const CAM* cam)
 
     log.predictedVeh = cam->getVehicleId();
 
+    bool isReplay = false;
+
     if (currentState == FOLLOWING and systemIsSafe) {
-        // dont run any evaluation until you have at least a 5long full window of recent CAMs
-        int id = cam->getVehicleId();
-        auto& beaconLog = beaconBuffer[id];
-        bool needEval = (beaconLog.size() == 5);
-        if (needEval) {
-            if (defenseEnabled == NODEF) {  // no defense
+        
+        if (defenseEnabled == DRD) {
+            // Data Replay Detector
+            size_t payloadHash = calculatePayloadHash(cam);
+            isReplay = !camMemoryMap.add(payloadHash, simTime().dbl());
+        }
+
+        if (isReplay) {
+            // DRD Latency Experiment:
+            int vid = cam->getVehicleId();
+            if (drdFirstDetectionTime.find(vid) == drdFirstDetectionTime.end() || drdFirstDetectionTime[vid] < 0) {
+                drdFirstDetectionTime[vid] = simTime().dbl();
+                std::cout << "DRD TIMER PARTITO AL SECONDO: " << drdFirstDetectionTime[vid] << " (Vero attacco inizia a: " << misbehaveTime << ")" << std::endl;
+            }
+
+            // Only trigger attack if 0.4 seconds have passed since first detection
+            if (simTime().dbl() - drdFirstDetectionTime[vid] >= 0.39) {
+                attack = true;
+                
+                // Log prediction as attack
+                log.mdspl = 1;
+                detectionTime = simTime().dbl();
+                traffic->setReactionTime(detectionTime - misbehaveTime);
                 logPrediction(log, log.mdspl);
             }
-            else if (defenseEnabled == HEUADV) {  // RULE-based defense
-                attack = evaluateBeaconPlausibility(cam, log);
-            }
-            else if (defenseEnabled == NNDEF) {  // AI-based defense
-                attack = managePrediction(cam, log);
-            }
-            else if (defenseEnabled == FULL) {  // Hybrid defense
-                bool heu_attack = evaluateBeaconPlausibility(cam, ruleLog);
-                bool ai_attack = managePrediction(cam, aiLog);
-                // Confidence-based Score Fusion
-                log.mdso = CSF(ruleLog, aiLog);
-                log.mdspl = (log.mdso > DECIDER_THRESHOLD) ? 1 : 0;
+        }
+        else {
+            int vid = cam->getVehicleId();
+            drdFirstDetectionTime[vid] = -1.0;
 
-                if (log.mdspl != 0) {
-                    detectionTime = simTime().dbl();
-                    traffic->setReactionTime(detectionTime - misbehaveTime);
+            // dont run any evaluation until you have at least a 5long full window of recent CAMs
+            int id = cam->getVehicleId();
+            auto& beaconLog = beaconBuffer[id];
+            bool needEval = (beaconLog.size() == 5);
+            if (needEval) {
+                if (defenseEnabled == NODEF) {  // no defense
+                    logPrediction(log, log.mdspl);
                 }
+                else if (defenseEnabled == HEUADV) {  // RULE-based defense
+                    attack = evaluateBeaconPlausibility(cam, log);
+                }
+                else if (defenseEnabled == NNDEF) {  // AI-based defense
+                    attack = managePrediction(cam, log);
+                }
+                else if (defenseEnabled == FULL || defenseEnabled == DRD) {  // Hybrid defense
+                    bool heu_attack = evaluateBeaconPlausibility(cam, ruleLog);
+                    bool ai_attack = managePrediction(cam, aiLog);
+                    // Confidence-based Score Fusion
+                    log.mdso = CSF(ruleLog, aiLog);
+                    log.mdspl = (log.mdso > DECIDER_THRESHOLD) ? 1 : 0;
 
-                attack = log.mdspl > 0;
+                    if (log.mdspl != 0) {
+                        detectionTime = simTime().dbl();
+                        traffic->setReactionTime(detectionTime - misbehaveTime);
+                    }
 
-                mergeLogs(log, ruleLog, aiLog);
-                logPrediction(log, log.mdspl);
+                    attack = log.mdspl > 0;
+
+                    mergeLogs(log, ruleLog, aiLog);
+                    logPrediction(log, log.mdspl);
+                }
             }
         }
     }
@@ -458,7 +493,28 @@ void DefenseApp::onPlatoonBeacon(const CAM* cam)
     // set the message to be replayed
     protocol->setReplayMessage(cam);
 
-    SimplePlatooningApp::onPlatoonBeacon(cam);
+    camMemoryMap.garbageCollect(simTime().dbl(), maxAgeCAMReplayDetection);
+
+    if (isReplay) {
+        // We removed 'delete cam' to ensure we behave exactly like FULL during the latency window
+        SimplePlatooningApp::onPlatoonBeacon(cam);
+    } else {
+        SimplePlatooningApp::onPlatoonBeacon(cam);
+    }
+}
+
+size_t DefenseApp::calculatePayloadHash(const CAM* cam)
+{
+    std::stringstream ss;
+    ss << cam->getControllerAcceleration() << "_"
+       << cam->getAcceleration() << "_"
+       << cam->getSpeed() << "_"
+       << cam->getPositionX() << "_"
+       << cam->getPositionY() << "_"
+       << cam->getSpeedX() << "_"
+       << cam->getSpeedY() << "_"
+       << cam->getAngle();
+    return std::hash<std::string>{}(ss.str());
 }
 
 void DefenseApp::setWarning(bool warning)

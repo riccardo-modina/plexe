@@ -52,29 +52,21 @@ void MisbehaviorScenario::initialize(int stage)
         // the actual vehicle and the one that has to
         // receive
         if(myPos == idMisbehavior and strcmp(misbehavior.c_str(), "dataReplay") == 0){
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_int_distribution<> dis(-1, platoonSize-1);
-
             int randomNum;
 
             // not my messages or the destination vehicle
             do {
-                randomNum = dis(gen);
+                randomNum = intuniform(-1, platoonSize-1);
             } while (randomNum == myPos);
             defenseAppl->setReplayIndex(randomNum);
         }
 
         if(myPos == idMisbehavior and strcmp(misbehavior.c_str(), "disruptive") == 0){
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_int_distribution<> dis(-1, platoonSize-1);
-
             int randomNum;
 
             // not my messages or the destination vehicle
             do {
-                randomNum = dis(gen);
+                randomNum = intuniform(-1, platoonSize-1);
             } while (randomNum == myPos);
             defenseAppl->setReplayIndex(randomNum);
             selectRandomIndexMsg = new cMessage(misbehavior.c_str());
@@ -105,14 +97,10 @@ void MisbehaviorScenario::handleSelfMsg(cMessage* msg)
 
     // if disruptive select a random index every step
     if (msg == selectRandomIndexMsg){
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(-1, platoonSize-1);
-
         int randomNum;
         // not my messages or the destination vehicle
         do {
-            randomNum = dis(gen);
+            randomNum = intuniform(-1, platoonSize-1);
         } while (randomNum == positionHelper->getPosition());
         defenseAppl->setReplayIndex(randomNum);
         scheduleAt(simTime() + SimTime(0.1), selectRandomIndexMsg);
