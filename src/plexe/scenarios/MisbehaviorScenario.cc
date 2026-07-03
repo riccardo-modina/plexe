@@ -51,26 +51,19 @@ void MisbehaviorScenario::initialize(int stage)
         // generate a random in the platoon excluding
         // the actual vehicle and the one that has to
         // receive
-        if(myPos == idMisbehavior and strcmp(misbehavior.c_str(), "dataReplay") == 0){
+        if(myPos == idMisbehavior and (strcmp(misbehavior.c_str(), "dataReplay") == 0) or (strcmp(misbehavior.c_str(), "disruptive") == 0)){
             int randomNum;
 
             // not my messages or the destination vehicle
             do {
-                randomNum = intuniform(-1, platoonSize-1);
+                randomNum = intuniform(0, platoonSize-1);
             } while (randomNum == myPos);
             defenseAppl->setReplayIndex(randomNum);
-        }
 
-        if(myPos == idMisbehavior and strcmp(misbehavior.c_str(), "disruptive") == 0){
-            int randomNum;
-
-            // not my messages or the destination vehicle
-            do {
-                randomNum = intuniform(-1, platoonSize-1);
-            } while (randomNum == myPos);
-            defenseAppl->setReplayIndex(randomNum);
-            selectRandomIndexMsg = new cMessage(misbehavior.c_str());
-            scheduleAt(SimTime(timeMisbehavior), selectRandomIndexMsg);
+            if (misbehavior == "disruptive") {
+                selectRandomIndexMsg = new cMessage(misbehavior.c_str());
+                scheduleAt(SimTime(timeMisbehavior), selectRandomIndexMsg);
+            }
         }
 
         if (myPos == idMisbehavior) {
@@ -100,7 +93,7 @@ void MisbehaviorScenario::handleSelfMsg(cMessage* msg)
         int randomNum;
         // not my messages or the destination vehicle
         do {
-            randomNum = intuniform(-1, platoonSize-1);
+            randomNum = intuniform(0, platoonSize-1);
         } while (randomNum == positionHelper->getPosition());
         defenseAppl->setReplayIndex(randomNum);
         scheduleAt(simTime() + SimTime(0.1), selectRandomIndexMsg);
