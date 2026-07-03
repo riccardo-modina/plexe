@@ -28,27 +28,27 @@ void MisbeProtocol::handleSelfMsg(cMessage* msg)
             // not during an attack
             SimplePlatooningBeaconing::handleSelfMsg(msg);
             return;
-        } else if (strcmp(attackType, "dataReplay") == 0) {
+        } else if (attackType == "dataReplay") {
             // attack of type replay
             sendReplayMessage(-1);
             scheduleAt(simTime() + beaconingInterval, sendBeacon);
-        } else if (strcmp(attackType, "disruptive") == 0) {
+        } else if (attackType == "disruptive") {
             // attack of type disruptive
             sendDisruptiveMessage(-1);
             scheduleAt(simTime() + beaconingInterval, sendBeacon);
         } else {
-            if(strcmp(attackType, "randomPos") == 0){
+            if(attackType == "randomPos"){
                 posx = intuniform(lower_bound_random, upper_bound_random);
                 posy = intuniform(lower_bound_random, upper_bound_random);
             }
-            if(strcmp(attackType, "randomOffset") == 0){
+            if(attackType == "randomOffset"){
                 offset = intuniform(lower_bound_offset, upper_bound_offset);
             }
-            if(strcmp(attackType, "randomSpeed") == 0){
+            if(attackType == "randomSpeed"){
                 spdx = intuniform(lower_bound_random_speed, upper_bound_random_speed);
                 spdy = intuniform(lower_bound_random_speed, upper_bound_random_speed);
             }
-            if(strcmp(attackType, "randomOffsetSpeed") == 0){
+            if(attackType == "randomOffsetSpeed"){
                 offset = intuniform(lower_bound_offset_speed, upper_bound_offset_speed);
             }
             sendMisbehaviorMessage(-1);
@@ -125,7 +125,7 @@ std::unique_ptr<BaseFrame1609_4> MisbeProtocol::createMisbehaviorBeacon(int dest
     PlatooningBeacon* pkt = new PlatooningBeacon();
 
     pkt->setControllerAcceleration(data.u);
-    if(strcmp(attackType, "eventualStop") == 0){
+    if(attackType == "eventualStop"){
         pkt->setAcceleration(acl);
     } else {
         pkt->setAcceleration(data.acceleration);
@@ -135,10 +135,10 @@ std::unique_ptr<BaseFrame1609_4> MisbeProtocol::createMisbehaviorBeacon(int dest
     pkt->setVehicleId(myId);
 
     // POSITION MISBEHAVIOR
-    if(strcmp(attackType, "randomOffset") == 0){
+    if(attackType == "randomOffset"){
         pkt->setPositionX(data.positionX + offset);
         pkt->setPositionY(data.positionY + offset);
-    } else if (strcmp(attackType, "randomPos") == 0 or strcmp(attackType, "constPos") == 0 or strcmp(attackType, "eventualStop") == 0) {
+    } else if (attackType == "randomPos" or attackType == "constPos" or attackType == "eventualStop") {
         pkt->setPositionX(posx);
         pkt->setPositionY(posy);
     } else {
@@ -149,11 +149,11 @@ std::unique_ptr<BaseFrame1609_4> MisbeProtocol::createMisbehaviorBeacon(int dest
     pkt->setLength(length);
 
     // SPEED MISBEHAVIOR
-    if(strcmp(attackType, "randomOffsetSpeed") == 0){
+    if(attackType == "randomOffsetSpeed"){
         pkt->setSpeedX(data.speedX + offset);
         pkt->setSpeed(data.speed + offset);
         pkt->setSpeedY(data.speedY + offset);
-    }  else if (strcmp(attackType, "randomSpeed") == 0 or strcmp(attackType, "constSpeed") == 0 or strcmp(attackType, "eventualStop") == 0) {
+    }  else if (attackType == "randomSpeed" or attackType == "constSpeed" or attackType == "eventualStop") {
         pkt->setSpeedX(spdx);
         pkt->setSpeed(spdx);
         pkt->setSpeedY(spdy);
@@ -190,23 +190,23 @@ void MisbeProtocol::setWarning(bool misbehaviour)
     warning = misbehaviour;
 }
 
-void MisbeProtocol::activeAttack(const char* type)
+void MisbeProtocol::activeAttack(std::string type)
 {
     onAttack = true;
     attackType = type;
-    if(strcmp(type, "constPos") == 0){
+    if(type == "constPos"){
         VEHICLE_DATA data;
         plexeTraciVehicle->getVehicleData(&data);
         posx = data.positionX;
         posy = data.positionY;
     }
-    if(strcmp(type, "constSpeed") == 0){
+    if(type == "constSpeed"){
         VEHICLE_DATA data;
         plexeTraciVehicle->getVehicleData(&data);
         spdx = data.speedX;
         spdy = data.speedY;
     }
-    if(strcmp(type, "eventualStop") == 0){
+    if(type == "eventualStop"){
         VEHICLE_DATA data;
         plexeTraciVehicle->getVehicleData(&data);
         spdx = 0;

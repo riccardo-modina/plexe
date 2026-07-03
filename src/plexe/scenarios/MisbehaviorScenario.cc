@@ -51,7 +51,7 @@ void MisbehaviorScenario::initialize(int stage)
         // generate a random in the platoon excluding
         // the actual vehicle and the one that has to
         // receive
-        if(myPos == idMisbehavior and (strcmp(misbehavior.c_str(), "dataReplay") == 0) or (strcmp(misbehavior.c_str(), "disruptive") == 0)){
+        if(myPos == idMisbehavior and (misbehavior == "dataReplay" or misbehavior == "disruptive")){
             int randomNum;
 
             // not my messages or the destination vehicle

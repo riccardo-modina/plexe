@@ -5,6 +5,7 @@
 
 #include "plexe/messages/PlatooningBeacon_m.h"
 #include "plexe/protocols/SimplePlatooningBeaconing.h"
+#include <string>
 
 namespace plexe {
 
@@ -19,7 +20,7 @@ protected:
     // define when to create and attack to handle the message
     bool onAttack;
     // define the type of attack for the current vehicle
-    const char* attackType;
+    std::string attackType;
 
     // misbehavior positions to be transmitted
     double posx;
