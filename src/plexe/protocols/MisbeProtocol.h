@@ -80,7 +80,7 @@ public:
     // set the warning in sent beacons
     void setWarning(bool misbehaviour);
     // set the onAttack variable
-    void activeAttack(const char* type);
+    void activeAttack(std::string type);
     // set the message to be replayed in case of replay attack
     void setReplayMessage(const PlatooningBeacon* pb);
     // set the index to replay in case of data replay attack
