@@ -40,6 +40,17 @@ protected:
     struct VEHICLE_DATA replayData;
     int replayIndex;
 
+    // bounds for random delay between replays
+    double lower_bound_delay = 0.05;
+    double upper_bound_delay = 7.0;
+
+    cMessage* sendRandomAttackTimer;
+    
+    // burst variables
+    bool isBursting;
+    double burst_duration_lower = 1.0;
+    double burst_duration_upper = 3.0;
+
     virtual void initialize(int stage) override;
 
     virtual void handleSelfMsg(cMessage* msg) override;
@@ -75,7 +86,10 @@ public:
         spdx = 0;
         spdy = 0;
         acl = 0;
+        sendRandomAttackTimer = nullptr;
+        isBursting = false;
     }
+    virtual ~MisbeProtocol();
 
     // set the warning in sent beacons
     void setWarning(bool misbehaviour);

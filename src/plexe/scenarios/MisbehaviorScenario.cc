@@ -51,7 +51,7 @@ void MisbehaviorScenario::initialize(int stage)
         // generate a random in the platoon excluding
         // the actual vehicle and the one that has to
         // receive
-        if(myPos == idMisbehavior and (misbehavior == "dataReplay" or misbehavior == "disruptive")){
+        if(myPos == idMisbehavior and (misbehavior == "dataReplay" or misbehavior == "disruptive" or misbehavior == "randomDataReplay" or misbehavior == "randomDisruptive")){
             int randomNum;
 
             // not my messages or the destination vehicle
@@ -60,7 +60,7 @@ void MisbehaviorScenario::initialize(int stage)
             } while (randomNum == myPos);
             defenseAppl->setReplayIndex(randomNum);
 
-            if (misbehavior == "disruptive") {
+            if (misbehavior == "disruptive" or misbehavior == "randomDisruptive") {
                 selectRandomIndexMsg = new cMessage(misbehavior.c_str());
                 scheduleAt(SimTime(timeMisbehavior), selectRandomIndexMsg);
             }

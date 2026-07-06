@@ -24,7 +24,7 @@ void NoisyScenario::initialize(int stage)
         cModule* traffic = this->getModuleByPath("^.^.traffic");
         timeMisbehavior = traffic->par("timeMisbehavior").doubleValue();
 
-        if(myPos == idNoisyAttacker and strcmp(misbehavior.c_str(), "dataReplay") == 0){
+        if(myPos == idNoisyAttacker and (misbehavior == "dataReplay" or misbehavior == "randomDataReplay")){
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_int_distribution<> dis(-1, numNoisyVehicles-1);
@@ -38,7 +38,7 @@ void NoisyScenario::initialize(int stage)
             defenseAppl->setReplayIndex(randomNum);
         }
 
-        if(myPos == idNoisyAttacker and strcmp(misbehavior.c_str(), "disruptive") == 0){
+        if(myPos == idNoisyAttacker and (misbehavior == "disruptive" or misbehavior == "randomDisruptive")){
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_int_distribution<> dis(-1, numNoisyVehicles-1);
