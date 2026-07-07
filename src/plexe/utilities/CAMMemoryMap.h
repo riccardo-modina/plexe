@@ -28,15 +28,10 @@ public:
         return memoryMap.find(key) != memoryMap.end();
     }
 
-    // Add a key (hash) with its insertion timestamp.
-    // Returns true if added/updated successfully, false if already present (replay attack).
     bool add(size_t key, double timestamp) {
-        auto it = memoryMap.find(key);
-        if (it != memoryMap.end()) {
-            return false; // attack: payload hash already present
-        }
-        memoryMap[key] = timestamp;
-        return true;
+        // returns false if key already exists (replay attack),
+        // or true if it was successfully added.
+        return memoryMap.insert({key, timestamp}).second;
     }
 
     // Garbage collection: remove all entries older than maxAgeCAMReplayDetection seconds relative to currentTime
