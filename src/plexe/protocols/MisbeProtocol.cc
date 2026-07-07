@@ -233,4 +233,9 @@ void MisbeProtocol::setReplayMessage(const PlatooningBeacon* pb)
     }
 }
 
+MisbeProtocol::~MisbeProtocol()
+{
+    cancelAndDelete(sendRandomAttackTimer);
+}
+
 } // namespace plexe

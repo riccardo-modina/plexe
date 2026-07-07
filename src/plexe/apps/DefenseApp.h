@@ -69,6 +69,8 @@ struct LOGGING_STRUCT {
     double jerk = -1;
     double se = -1;
     double pe = -1;
+    double evalTimeAI = -1;
+    double evalTimeDRD = -1;
 };
 
 class MisbeProtocol;
@@ -241,6 +243,12 @@ protected:
 
 	// signal to be emit in vec file that represent the position error computed by rule mds
 	simsignal_t peSignal;
+
+	// signal to be emit in vec file that represent the AI computation time
+	simsignal_t evalTimeAISignal;
+
+	// signal to be emit in vec file that represent the DRD computation time
+	simsignal_t evalTimeDRDSignal;
 
 	MisbeProtocol* protocol;
 

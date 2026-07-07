@@ -98,6 +98,12 @@ simple DefenseApp extends SimplePlatooningApp
         @signal[pe](type="double");
         @statistic[pe](source="pe"; record=vector,stats?,timeavg?);
 
+        @signal[evalTimeAI](type="double");
+        @statistic[evalTimeAI](source="evalTimeAI"; record=vector,stats?,timeavg?);
+
+        @signal[evalTimeDRD](type="double");
+        @statistic[evalTimeDRD](source="evalTimeDRD"; record=vector,stats?,timeavg?);
+
         @display("i=block/app2");
         @class(plexe::DefenseApp);
 }

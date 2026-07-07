@@ -24,6 +24,8 @@
 
 #include "plexe/protocols/MisbeProtocol.h"
 
+#include <chrono>
+
 #include <math.h>
 #include <cmath>
 #include <sstream>
@@ -71,6 +73,8 @@ void DefenseApp::initialize(int stage)
         jerkSignal = registerSignal("jerk");
         seSignal = registerSignal("se");
         peSignal = registerSignal("pe");
+        evalTimeAISignal = registerSignal("evalTimeAI");
+        evalTimeDRDSignal = registerSignal("evalTimeDRD");
     }
 
     if(stage == 1){
@@ -230,7 +234,12 @@ bool DefenseApp::managePrediction(const CAM* cam, LOGGING_STRUCT& log)
 	bool work = (beaconLog.size() == 5);
 	if (work) {
 	    std::vector<const CAM*> ordMsgs = beaconLog.getOrderedMessages();
+	    
+	    auto start = std::chrono::high_resolution_clock::now();
 	    log.nblai = nn_wrapper->predict(ordMsgs, log.nblai, log.cai, log.muai, log.CLai);
+	    auto end = std::chrono::high_resolution_clock::now();
+	    log.evalTimeAI = std::chrono::duration<double>(end - start).count();
+	    
 		log.lai = (log.nblai == 0) ? 0 : 1;
 		if (defenseEnabled != FULL and defenseEnabled != DRD)
 		    logPrediction(log, log.nblai);
@@ -296,6 +305,8 @@ void DefenseApp::logPrediction(LOGGING_STRUCT& log, int prediction)
     emit(jerkSignal, log.jerk);
     emit(seSignal, log.se);
     emit(peSignal, log.pe);
+    emit(evalTimeAISignal, log.evalTimeAI);
+    emit(evalTimeDRDSignal, log.evalTimeDRD);
 }
 
 
@@ -407,6 +418,7 @@ void DefenseApp::mergeLogs(LOGGING_STRUCT& log, LOGGING_STRUCT& ruleLog, LOGGING
     log.jerk = ruleLog.jerk;
     log.se = ruleLog.se;
     log.pe = ruleLog.pe;
+    log.evalTimeAI = aiLog.evalTimeAI;
 }
 
 void DefenseApp::onPlatoonBeacon(const CAM* cam)
@@ -426,6 +438,8 @@ void DefenseApp::onPlatoonBeacon(const CAM* cam)
     if (currentState == FOLLOWING and systemIsSafe) {
         
         if (defenseEnabled == DRD || defenseEnabled == ONLYDRD) {
+            auto start = std::chrono::high_resolution_clock::now();
+            
             // Data Replay Detector
             // hash computation
             size_t payloadHash = calculatePayloadHash(cam);
@@ -435,6 +449,9 @@ void DefenseApp::onPlatoonBeacon(const CAM* cam)
 
             // check if the beacon is already present, if true it's a replay attack (add returns true if added succesfully meaning no identic cam was recived in the window)
             isReplay = !camMemoryMap.add(payloadHash, simTime().dbl());
+            
+            auto end = std::chrono::high_resolution_clock::now();
+            log.evalTimeDRD = std::chrono::duration<double>(end - start).count();
         }
 
         if (isReplay) {
